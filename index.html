@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1f6f54">
+<meta name="theme-color" content="#0b0d1c">
 <title>Pocket Coach</title>
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icon-192.png">
@@ -148,6 +148,13 @@ h1{margin:0;font-size:28px;letter-spacing:-.02em}
 .ptr{position:fixed;top:0;left:50%;transform:translate(-50%,-60px);z-index:40;background:var(--card);border:1px solid var(--line);border-radius:99px;padding:8px 14px;font-size:13px;color:var(--mute);display:flex;gap:8px;align-items:center;box-shadow:0 4px 16px rgba(0,0,0,.15);transition:transform .15s}
 .ptr i{width:14px;height:14px;border:2px solid var(--soft);border-top-color:var(--brand);border-radius:50%}
 .ptr.go i{animation:r 1s linear infinite}
+.lb{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line)}
+.lb:last-child{border-bottom:0}
+.lb .rk{width:26px;height:26px;border-radius:50%;background:var(--soft);display:grid;place-items:center;font-size:13px;font-weight:700;flex:none}
+.lb .rk.r1{background:var(--gold);color:#fff}
+.lb .nm{flex:1;min-width:0;font-weight:600}.lb .nm small{color:var(--mute);font-weight:400}
+.lb .amt{font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+.code{font-family:ui-monospace,Menlo,monospace;letter-spacing:.15em;font-weight:700;background:var(--soft);padding:2px 8px;border-radius:8px}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;opacity:0;transition:.25s;z-index:30;pointer-events:none;font-size:14px;max-width:90vw;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%)}
 </style>
@@ -183,7 +190,7 @@ h1{margin:0;font-size:28px;letter-spacing:-.02em}
   </section>
 
   <section class="view" id="viewWant">
-  <div class="savedtile"><div class="k" data-i18n="saved_pause"></div><div class="v" id="vSaved">-</div><div class="s" id="savedSub"></div></div>
+  <div class="savedtile"><div class="k" data-i18n="saved_pause"></div><div class="v" id="vSaved">-</div><div class="s" id="savedSub"></div><button class="btn sec" id="btnCard" style="margin-top:10px;padding:8px 12px;font-size:14px" data-i18n="share_card"></button></div>
   <div id="goalBox"></div>
   <div id="regretBox"></div>
   <div class="stats">
@@ -198,6 +205,8 @@ h1{margin:0;font-size:28px;letter-spacing:-.02em}
   <div id="wishList"></div>
   </section>
 
+  <section class="view" id="viewFriends"><div id="frBody" style="margin-top:16px"></div></section>
+
   <section class="view" id="viewInsight"><div id="insBody" style="margin-top:16px"></div></section>
 </div>
 
@@ -205,6 +214,7 @@ h1{margin:0;font-size:28px;letter-spacing:-.02em}
   <button class="on" data-tab="Spend"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M16 12.5h2M3 10h18"/></svg><span data-i18n="tab_spend"></span></button>
   <button data-tab="Want"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg><span data-i18n="tab_want"></span><span class="badge" id="wantBadge" hidden></span></button>
   <button data-tab="Insight"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span data-i18n="tab_insight"></span></button>
+  <button data-tab="Friends"><svg viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0 1 13 0M16 4.5a3.5 3.5 0 0 1 0 7M18 14a6 6 0 0 1 3.5 6"/></svg><span data-i18n="tab_friends"></span></button>
 </nav>
 <div id="sheetWish" class="ov"><div class="sheet" id="wishBody"></div></div>
 <div id="sheetWage" class="ov"><div class="sheet">
@@ -234,6 +244,7 @@ h1{margin:0;font-size:28px;letter-spacing:-.02em}
 </div></div>
 <div id="sheetSet" class="ov"><div class="sheet">
   <div class="hd"><h3 data-i18n="settings"></h3><button class="btn sec" data-close="sheetSet" data-i18n="close"></button></div>
+  <button class="btn sec full" id="btnAcct" style="margin:0 0 12px" data-i18n="acct_title"></button>
   <div class="fld"><label data-i18n="language"></label><select id="selLang"></select></div>
   <div class="fld"><label data-i18n="main_cur"></label><select id="selMain"></select></div>
   <p class="lbl" data-i18n="theme"></p><div class="sw" id="themeSw"></div>
@@ -248,12 +259,13 @@ h1{margin:0;font-size:28px;letter-spacing:-.02em}
   <p class="muted" style="text-align:center;margin:14px 0 0" id="verLbl"></p>
   <button class="btn warn full" id="btnClear" style="margin-top:14px" data-i18n="clear_all"></button>
 </div></div>
+<div id="sheetAcct" class="ov"><div class="sheet" id="acctBody"></div></div>
 <div id="toast" class="toast"></div>
 <div id="ptr" class="ptr"><i></i><span id="ptrTxt"></span></div>
 <script src="qrcode.js"></script>
 
 <script>
-const VERSION = "3";
+const VERSION = "4";
 // ===== TRANSLATIONS (every language must have exactly the same keys) =====
 const T = {
 en:{app_sub:"Your pocket money coach.",wallet_left:"Cash left in wallet",wallet_set:"Set wallet",wallet_unset:"Tap Set wallet to start",wallet_since:"Since {d} · spent {a}",wallet_title:"Cash in your wallet",wallet_hint:"Count the cash in your wallet now. Pocket subtracts every cash spending after this.",wallet_now:"I have this much cash now",wallet_add:"Add to wallet (ATM, top up)",wallet_added:"Added {a} to wallet",today_spent:"Spent today",month_spent:"Spent this month",
@@ -261,19 +273,19 @@ quick_ph:"e.g. chicken rice 50, taxi 80",quick_title:"Check and save",quick_none
 empty_exp:"No spending yet",empty_exp_hint:"Type what you spent above, or snap a receipt or a transfer slip.",reading:"Reading...",new_exp:"New spending",edit_exp:"Edit spending",amount:"Amount",merchant:"Where / what",merchant_ph:"e.g. 7-Eleven",category:"Category",method:"Paid with",m_cash:"Cash",m_transfer:"QR / transfer",m_card:"Card",date:"Date",note:"Note",save:"Save",cancel:"Cancel",delete:"Delete",close:"Close",
 confirm_delete:"Delete this item?",retry:"Try again",ai_fail:"The AI is busy right now. Wait a few seconds and tap Try again. You can also fill it in yourself.",ai_items:"What the AI read",ai_check:"Please check the amount before saving.",unreadable:"I could not find a price in this photo. You can type it in.",
 c_food:"Food",c_drink:"Drinks",c_groceries:"Groceries",c_transport:"Transport",c_shopping:"Shopping",c_bills:"Bills",c_health:"Health",c_fun:"Fun",c_other:"Other",
-settings:"Settings",language:"Language",theme:"Theme",th_auto:"Auto",th_light:"Light",th_dark:"Dark",show_src:"Show which AI read each item",clear_all:"Delete all my data",confirm_clear:"Delete all data on this phone?",saved:"Saved",saved_n:"Saved {n} items",today:"Today",yesterday:"Yesterday",manual:"Entered by hand",version:"version {v}",tab_spend:"Spending",tab_want:"Want list",saved_pause:"Saved by pausing",saved_sub:"{n} things you decided to skip",saved_none:"Skip something after the cool-off and it shows up here",waiting_now:"Cooling off",wage_tile:"Your hourly pay",wage_unset:"Tap to set",want_hint:"Want to buy something online? Screenshot it and let it cool off first.",wish_shot:"Add screenshot",wish_manual:"Add by hand",wish_empty:"Nothing on your want list",wish_empty_hint:"Next time you are about to tap Buy, take a screenshot and add it here instead.",new_wish:"Pause before buying",wish_detail:"Want list item",item:"What is it",item_ph:"e.g. wireless earbuds",price:"Price you would pay",store:"Shop or app",wait_for:"Cool off for",d1:"1 day",d2:"2 days",d3:"3 days",start_pause:"Start cool-off",ask_q:"Ask me questions",ask_yourself:"Ask yourself",left_h:"{n} h left",left_m:"{n} min left",ready:"Time is up. Still want it?",still_want:"Still want it",skip_it:"Skip it",skip_now:"I don't need it",bought_on:"Bought · {d}",skipped_on:"Skipped · {d}",sec_ready:"Ready to decide",sec_wait:"Cooling off",sec_done:"Decided",hours_work:"≈ {h} of your work",hrs:"{n} h",mins:"{n} min",wage_title:"Hourly pay",wage_hint:"Prices will also show as hours of your own work. Use what you earn per hour after tax. If you have no job, use your pocket money divided by the hours you study.",wage_label:"I earn this much per hour",skipped_toast:"Nice choice. {a} stays in your pocket",bought_toast:"Check the details and save it as spending",need_item:"Add a name or price first",busy_wish:"The AI is busy, but you can still start the cool-off.",th_flow:"Flow night",th_cream:"Cream",th_olive:"Olive",th_rose:"Rose",th_purple:"Deep purple",tab_insight:"Insights",currency:"Currency",main_cur:"Main currency (for totals)",wallet_also:"Also: {list}",goal_title:"Savings goal",goal_hint:"Money you keep by skipping things after a cool-off goes toward this goal.",goal_name:"What are you saving for",goal_amount:"Goal amount",goal_set:"Set a savings goal",goal_set_hint:"For example a trip home or a new laptop",goal_prog:"{a} of {b}",goal_pct:"{p}% there",goal_done:"Goal reached",goal_closer:"{a} closer to {g}",regret_q:"{d} ago you bought {x}. Was it worth it?",f_worth:"Worth it",f_okay:"It's okay",f_regret:"Regret it",feel_saved:"Thanks. Your coach will learn from this.",ins_month:"Spent this month",ins_vs:"vs last month, same days",ins_avg:"Daily average",ins_cats:"Where it went",ins_pay:"How you paid",ins_want:"Want list",ins_skipped:"Skipped",ins_bought:"Bought",ins_regret_rate:"Regretted",ins_empty:"Add some spending to see your insights.",coach_title:"Weekly coach",coach_btn:"Get this week's advice",pattern_title:"Your buying pattern",pattern_btn:"Find my pattern",pattern_need:"Rate at least 2 things you bought after a cool-off to unlock this.",updated_on:"Updated {d}",rates_note:"Other currencies are converted at today's rate.",demo_mode:"Demo mode (1 day = 1 minute)",demo_on:"Demo mode: 1 day = 1 minute",open_phone:"Open on your phone",install_hint:"Scan with your phone camera. Then on iPhone tap Share > Add to Home Screen, on Android tap the menu > Install app.",share_app:"Share link",check_update:"Check for updates",pull:"Pull down to update",release:"Release to update",updating:"Updating...",up_to_date:"You have the latest version",new_version:"Updated to the newest version",days:"{n} days",mic_no:"Voice input is not available here. Use the microphone on your keyboard instead."},
+settings:"Settings",language:"Language",theme:"Theme",th_auto:"Auto",th_light:"Light",th_dark:"Dark",show_src:"Show which AI read each item",clear_all:"Delete all my data",confirm_clear:"Delete all data on this phone?",saved:"Saved",saved_n:"Saved {n} items",today:"Today",yesterday:"Yesterday",manual:"Entered by hand",version:"version {v}",tab_spend:"Spending",tab_want:"Want list",saved_pause:"Saved by pausing",saved_sub:"{n} things you decided to skip",saved_none:"Skip something after the cool-off and it shows up here",waiting_now:"Cooling off",wage_tile:"Your hourly pay",wage_unset:"Tap to set",want_hint:"Want to buy something online? Screenshot it and let it cool off first.",wish_shot:"Add screenshot",wish_manual:"Add by hand",wish_empty:"Nothing on your want list",wish_empty_hint:"Next time you are about to tap Buy, take a screenshot and add it here instead.",new_wish:"Pause before buying",wish_detail:"Want list item",item:"What is it",item_ph:"e.g. wireless earbuds",price:"Price you would pay",store:"Shop or app",wait_for:"Cool off for",d1:"1 day",d2:"2 days",d3:"3 days",start_pause:"Start cool-off",ask_q:"Ask me questions",ask_yourself:"Ask yourself",left_h:"{n} h left",left_m:"{n} min left",ready:"Time is up. Still want it?",still_want:"Still want it",skip_it:"Skip it",skip_now:"I don't need it",bought_on:"Bought · {d}",skipped_on:"Skipped · {d}",sec_ready:"Ready to decide",sec_wait:"Cooling off",sec_done:"Decided",hours_work:"≈ {h} of your work",hrs:"{n} h",mins:"{n} min",wage_title:"Hourly pay",wage_hint:"Prices will also show as hours of your own work. Use what you earn per hour after tax. If you have no job, use your pocket money divided by the hours you study.",wage_label:"I earn this much per hour",skipped_toast:"Nice choice. {a} stays in your pocket",bought_toast:"Check the details and save it as spending",need_item:"Add a name or price first",busy_wish:"The AI is busy, but you can still start the cool-off.",th_flow:"Flow night",th_cream:"Cream",th_olive:"Olive",th_rose:"Rose",th_purple:"Deep purple",tab_insight:"Insights",currency:"Currency",main_cur:"Main currency (for totals)",wallet_also:"Also: {list}",goal_title:"Savings goal",goal_hint:"Money you keep by skipping things after a cool-off goes toward this goal.",goal_name:"What are you saving for",goal_amount:"Goal amount",goal_set:"Set a savings goal",goal_set_hint:"For example a trip home or a new laptop",goal_prog:"{a} of {b}",goal_pct:"{p}% there",goal_done:"Goal reached",goal_closer:"{a} closer to {g}",regret_q:"{d} ago you bought {x}. Was it worth it?",f_worth:"Worth it",f_okay:"It's okay",f_regret:"Regret it",feel_saved:"Thanks. Your coach will learn from this.",ins_month:"Spent this month",ins_vs:"vs last month, same days",ins_avg:"Daily average",ins_cats:"Where it went",ins_pay:"How you paid",ins_want:"Want list",ins_skipped:"Skipped",ins_bought:"Bought",ins_regret_rate:"Regretted",ins_empty:"Add some spending to see your insights.",coach_title:"Weekly coach",coach_btn:"Get this week's advice",pattern_title:"Your buying pattern",pattern_btn:"Find my pattern",pattern_need:"Rate at least 2 things you bought after a cool-off to unlock this.",updated_on:"Updated {d}",rates_note:"Other currencies are converted at today's rate.",demo_mode:"Demo mode (1 day = 1 minute)",demo_on:"Demo mode: 1 day = 1 minute",open_phone:"Open on your phone",install_hint:"Scan with your phone camera. Then on iPhone tap Share > Add to Home Screen, on Android tap the menu > Install app.",share_app:"Share link",check_update:"Check for updates",pull:"Pull down to update",release:"Release to update",updating:"Updating...",up_to_date:"You have the latest version",new_version:"Updated to the newest version",days:"{n} days",tab_friends:"Friends",acct_title:"Account and sync",acct_hint:"Sign in to back up your records and use them on another phone. Photos stay on this phone.",email:"Email",password:"Password (at least 6 characters)",sign_in:"Sign in",sign_up:"Create account",sign_out:"Sign out",signed_as:"Signed in as {e}",sync_now:"Sync now",synced_at:"Last synced {d}",syncing:"Syncing...",sync_off:"Sync is not set up on this site yet.",check_email:"Check your email and tap the link to confirm, then sign in here.",fr_title:"Saving challenge",fr_hint:"Pause before buying, together. Friends only see how much each person saved by skipping things, never what you bought.",fr_login:"Sign in to start a saving challenge with friends.",your_name:"Your name (friends see this)",fr_create:"Start a challenge",fr_join:"Join with a code",fr_code:"Challenge code",ch_name:"Challenge name",ch_name_ph:"e.g. No Shopee November",ch_len:"How long",w1:"1 week",w2:"2 weeks",w4:"1 month",create:"Create",join:"Join",ch_ends:"{n} days left",ch_ended:"Ended",ch_share:"Invite friends",ch_invite:"Join my Pocket Coach saving challenge \"{n}\". Code: {c}",ch_leave:"Leave",you:"you",ch_none:"No challenges yet. Start one or join a friend's.",need_name:"Add your name first",skipped_n:"{n} skipped",share_card:"Share my savings card",card_saved:"saved by pausing before buying",card_skipped:"{n} things I decided not to buy",card_goal:"Saving for {g}: {p}%",card_cta:"Pause before you buy.",mic_no:"Voice input is not available here. Use the microphone on your keyboard instead."},
 zh:{app_sub:"你的口袋理財教練。",wallet_left:"錢包還剩",wallet_set:"設定錢包",wallet_unset:"按「設定錢包」開始",wallet_since:"{d} 起 · 已花 {a}",wallet_title:"錢包裡的現金",wallet_hint:"數一下你錢包現在有多少現金。之後每一筆現金花費，Pocket 都會自動扣掉。",wallet_now:"我現在有多少現金",wallet_add:"加進錢包（領錢、補錢）",wallet_added:"錢包增加 {a}",today_spent:"今天花了",month_spent:"本月花了",
 quick_ph:"例如：雞飯 50、計程車 80",quick_title:"確認後儲存",quick_none:"找不到金額，試試「麵 60」這樣的寫法。",save_all:"儲存 {n} 筆",scan_receipt:"拍收據",from_gallery:"選照片",add_manual:"手動記一筆",
 empty_exp:"還沒有紀錄",empty_exp_hint:"在上面打字或用語音說你花了什麼，或拍收據、轉帳截圖。",reading:"讀取中...",new_exp:"新增支出",edit_exp:"修改支出",amount:"金額",merchant:"在哪裡／買什麼",merchant_ph:"例如：7-Eleven",category:"類別",method:"付款方式",m_cash:"現金",m_transfer:"掃碼／轉帳",m_card:"刷卡",date:"日期",note:"備註",save:"儲存",cancel:"取消",delete:"刪除",close:"關閉",
 confirm_delete:"要刪除這筆嗎？",retry:"再試一次",ai_fail:"AI 現在比較忙，請稍等幾秒再按一次。你也可以自己填好儲存。",ai_items:"AI 讀到的內容",ai_check:"儲存前請確認金額。",unreadable:"這張照片裡找不到價格，可以自己輸入。",
 c_food:"餐飲",c_drink:"飲料",c_groceries:"日用採買",c_transport:"交通",c_shopping:"購物",c_bills:"帳單",c_health:"醫療保健",c_fun:"娛樂",c_other:"其他",
-settings:"設定",language:"語言",theme:"主題",th_auto:"自動",th_light:"淺色",th_dark:"深色",show_src:"顯示每筆是哪個 AI 讀的",clear_all:"刪除我的所有資料",confirm_clear:"要刪除這支手機上的所有資料嗎？",saved:"已儲存",saved_n:"已儲存 {n} 筆",today:"今天",yesterday:"昨天",manual:"手動輸入",version:"版本 {v}",tab_spend:"記帳",tab_want:"想買清單",saved_pause:"冷靜期省下",saved_sub:"{n} 樣東西決定不買",saved_none:"冷靜期過後選「不買了」，省下的錢會顯示在這裡",waiting_now:"冷靜中",wage_tile:"你的時薪",wage_unset:"點這裡設定",want_hint:"想網購嗎？先截圖放進來冷靜一下。",wish_shot:"加截圖",wish_manual:"手動新增",wish_empty:"想買清單是空的",wish_empty_hint:"下次要按「購買」之前，先截圖放進來。",new_wish:"買之前先停一下",wish_detail:"想買的東西",item:"是什麼東西",item_ph:"例如：無線耳機",price:"實際要付的價格",store:"店家或 app",wait_for:"冷靜多久",d1:"1 天",d2:"2 天",d3:"3 天",start_pause:"開始冷靜期",ask_q:"讓 AI 問我問題",ask_yourself:"問問自己",left_h:"還有 {n} 小時",left_m:"還有 {n} 分鐘",ready:"時間到了，還想買嗎？",still_want:"還是想買",skip_it:"不買了",skip_now:"我不需要了",bought_on:"已購買 · {d}",skipped_on:"沒買 · {d}",sec_ready:"可以決定了",sec_wait:"冷靜中",sec_done:"已決定",hours_work:"約等於你工作 {h}",hrs:"{n} 小時",mins:"{n} 分鐘",wage_title:"時薪",wage_hint:"價格會同時顯示成你要工作幾小時。請填稅後每小時賺多少。沒有工作的話，可以用零用錢除以上課時數。",wage_label:"我每小時賺多少",skipped_toast:"好選擇，{a} 留在你的口袋裡",bought_toast:"確認內容後存成一筆支出",need_item:"請先填名稱或價格",busy_wish:"AI 現在比較忙，但你還是可以開始冷靜期。",th_flow:"Flow 夜色",th_cream:"奶油黃",th_olive:"橄欖綠",th_rose:"玫瑰粉",th_purple:"深紫",tab_insight:"分析",currency:"幣別",main_cur:"主要貨幣（用來算總額）",wallet_also:"另外：{list}",goal_title:"存錢目標",goal_hint:"冷靜期後決定不買而省下的錢，會算進這個目標。",goal_name:"想存錢做什麼",goal_amount:"目標金額",goal_set:"設定存錢目標",goal_set_hint:"例如回台灣的機票、新筆電",goal_prog:"{a} / {b}",goal_pct:"已達成 {p}%",goal_done:"目標達成",goal_closer:"離「{g}」又近了 {a}",regret_q:"你在 {d}前買了「{x}」，值得嗎？",f_worth:"值得",f_okay:"還好",f_regret:"後悔",feel_saved:"謝謝，教練會從這裡學習。",ins_month:"本月花了",ins_vs:"和上個月同期比",ins_avg:"每日平均",ins_cats:"錢花去哪裡",ins_pay:"付款方式",ins_want:"想買清單",ins_skipped:"沒買",ins_bought:"買了",ins_regret_rate:"後悔比例",ins_empty:"記幾筆花費後，這裡就會出現分析。",coach_title:"每週教練",coach_btn:"取得本週建議",pattern_title:"你的購物模式",pattern_btn:"找出我的模式",pattern_need:"冷靜期後買的東西，至少評分 2 樣才能使用。",updated_on:"更新於 {d}",rates_note:"其他貨幣用今天的匯率換算。",demo_mode:"示範模式（1 天 = 1 分鐘）",demo_on:"示範模式：1 天 = 1 分鐘",open_phone:"用手機打開",install_hint:"用手機相機掃描。iPhone 按分享 > 加入主畫面；Android 按選單 > 安裝應用程式。",share_app:"分享連結",check_update:"檢查更新",pull:"往下拉更新",release:"放開就更新",updating:"更新中...",up_to_date:"已經是最新版本",new_version:"已更新到最新版本",days:"{n} 天",mic_no:"這裡不支援語音，可以改用鍵盤上的麥克風。"},
+settings:"設定",language:"語言",theme:"主題",th_auto:"自動",th_light:"淺色",th_dark:"深色",show_src:"顯示每筆是哪個 AI 讀的",clear_all:"刪除我的所有資料",confirm_clear:"要刪除這支手機上的所有資料嗎？",saved:"已儲存",saved_n:"已儲存 {n} 筆",today:"今天",yesterday:"昨天",manual:"手動輸入",version:"版本 {v}",tab_spend:"記帳",tab_want:"想買清單",saved_pause:"冷靜期省下",saved_sub:"{n} 樣東西決定不買",saved_none:"冷靜期過後選「不買了」，省下的錢會顯示在這裡",waiting_now:"冷靜中",wage_tile:"你的時薪",wage_unset:"點這裡設定",want_hint:"想網購嗎？先截圖放進來冷靜一下。",wish_shot:"加截圖",wish_manual:"手動新增",wish_empty:"想買清單是空的",wish_empty_hint:"下次要按「購買」之前，先截圖放進來。",new_wish:"買之前先停一下",wish_detail:"想買的東西",item:"是什麼東西",item_ph:"例如：無線耳機",price:"實際要付的價格",store:"店家或 app",wait_for:"冷靜多久",d1:"1 天",d2:"2 天",d3:"3 天",start_pause:"開始冷靜期",ask_q:"讓 AI 問我問題",ask_yourself:"問問自己",left_h:"還有 {n} 小時",left_m:"還有 {n} 分鐘",ready:"時間到了，還想買嗎？",still_want:"還是想買",skip_it:"不買了",skip_now:"我不需要了",bought_on:"已購買 · {d}",skipped_on:"沒買 · {d}",sec_ready:"可以決定了",sec_wait:"冷靜中",sec_done:"已決定",hours_work:"約等於你工作 {h}",hrs:"{n} 小時",mins:"{n} 分鐘",wage_title:"時薪",wage_hint:"價格會同時顯示成你要工作幾小時。請填稅後每小時賺多少。沒有工作的話，可以用零用錢除以上課時數。",wage_label:"我每小時賺多少",skipped_toast:"好選擇，{a} 留在你的口袋裡",bought_toast:"確認內容後存成一筆支出",need_item:"請先填名稱或價格",busy_wish:"AI 現在比較忙，但你還是可以開始冷靜期。",th_flow:"Flow 夜色",th_cream:"奶油黃",th_olive:"橄欖綠",th_rose:"玫瑰粉",th_purple:"深紫",tab_insight:"分析",currency:"幣別",main_cur:"主要貨幣（用來算總額）",wallet_also:"另外：{list}",goal_title:"存錢目標",goal_hint:"冷靜期後決定不買而省下的錢，會算進這個目標。",goal_name:"想存錢做什麼",goal_amount:"目標金額",goal_set:"設定存錢目標",goal_set_hint:"例如回台灣的機票、新筆電",goal_prog:"{a} / {b}",goal_pct:"已達成 {p}%",goal_done:"目標達成",goal_closer:"離「{g}」又近了 {a}",regret_q:"你在 {d}前買了「{x}」，值得嗎？",f_worth:"值得",f_okay:"還好",f_regret:"後悔",feel_saved:"謝謝，教練會從這裡學習。",ins_month:"本月花了",ins_vs:"和上個月同期比",ins_avg:"每日平均",ins_cats:"錢花去哪裡",ins_pay:"付款方式",ins_want:"想買清單",ins_skipped:"沒買",ins_bought:"買了",ins_regret_rate:"後悔比例",ins_empty:"記幾筆花費後，這裡就會出現分析。",coach_title:"每週教練",coach_btn:"取得本週建議",pattern_title:"你的購物模式",pattern_btn:"找出我的模式",pattern_need:"冷靜期後買的東西，至少評分 2 樣才能使用。",updated_on:"更新於 {d}",rates_note:"其他貨幣用今天的匯率換算。",demo_mode:"示範模式（1 天 = 1 分鐘）",demo_on:"示範模式：1 天 = 1 分鐘",open_phone:"用手機打開",install_hint:"用手機相機掃描。iPhone 按分享 > 加入主畫面；Android 按選單 > 安裝應用程式。",share_app:"分享連結",check_update:"檢查更新",pull:"往下拉更新",release:"放開就更新",updating:"更新中...",up_to_date:"已經是最新版本",new_version:"已更新到最新版本",days:"{n} 天",tab_friends:"朋友",acct_title:"帳號與同步",acct_hint:"登入後可以備份紀錄，換手機也能用。照片只會留在這支手機。",email:"電子郵件",password:"密碼（至少 6 個字元）",sign_in:"登入",sign_up:"建立帳號",sign_out:"登出",signed_as:"已登入：{e}",sync_now:"立即同步",synced_at:"上次同步 {d}",syncing:"同步中...",sync_off:"這個網站還沒設定同步。",check_email:"請到信箱點連結確認，再回來登入。",fr_title:"存錢挑戰",fr_hint:"和朋友一起「買之前先停一下」。朋友只看得到每個人省下多少，看不到你買了什麼。",fr_login:"登入後就能和朋友開始存錢挑戰。",your_name:"你的名字（朋友會看到）",fr_create:"開始一個挑戰",fr_join:"用代碼加入",fr_code:"挑戰代碼",ch_name:"挑戰名稱",ch_name_ph:"例如：十一月不逛蝦皮",ch_len:"多久",w1:"1 週",w2:"2 週",w4:"1 個月",create:"建立",join:"加入",ch_ends:"還剩 {n} 天",ch_ended:"已結束",ch_share:"邀請朋友",ch_invite:"一起來玩 Pocket Coach 存錢挑戰「{n}」，代碼：{c}",ch_leave:"退出",you:"你",ch_none:"還沒有挑戰。開始一個，或加入朋友的。",need_name:"請先填你的名字",skipped_n:"沒買 {n} 樣",share_card:"分享我的省錢卡片",card_saved:"買之前先停一下，省下的錢",card_skipped:"{n} 樣東西決定不買",card_goal:"存錢目標「{g}」：{p}%",card_cta:"買之前，先停一下。",mic_no:"這裡不支援語音，可以改用鍵盤上的麥克風。"},
 th:{app_sub:"โค้ชการเงินในกระเป๋าของคุณ",wallet_left:"เงินสดเหลือในกระเป๋า",wallet_set:"ตั้งค่ากระเป๋า",wallet_unset:"แตะตั้งค่ากระเป๋าเพื่อเริ่ม",wallet_since:"ตั้งแต่ {d} · ใช้ไป {a}",wallet_title:"เงินสดในกระเป๋า",wallet_hint:"นับเงินสดในกระเป๋าตอนนี้ Pocket จะหักทุกรายจ่ายเงินสดหลังจากนี้",wallet_now:"ตอนนี้มีเงินสด",wallet_add:"เพิ่มเงินเข้ากระเป๋า (กดเงิน เติมเงิน)",wallet_added:"เพิ่ม {a} เข้ากระเป๋า",today_spent:"วันนี้ใช้ไป",month_spent:"เดือนนี้ใช้ไป",
 quick_ph:"เช่น ข้าวมันไก่ 50 แท็กซี่ 80",quick_title:"ตรวจแล้วบันทึก",quick_none:"ไม่พบจำนวนเงิน ลองพิมพ์แบบ \"ก๋วยเตี๋ยว 60\"",save_all:"บันทึก {n} รายการ",scan_receipt:"ถ่ายใบเสร็จ",from_gallery:"เลือกรูป",add_manual:"จดเอง",
 empty_exp:"ยังไม่มีรายการ",empty_exp_hint:"พิมพ์หรือพูดสิ่งที่ใช้จ่ายด้านบน หรือถ่ายใบเสร็จ สลิปโอนเงิน",reading:"กำลังอ่าน...",new_exp:"เพิ่มรายจ่าย",edit_exp:"แก้ไขรายจ่าย",amount:"จำนวนเงิน",merchant:"ที่ไหน / ซื้ออะไร",merchant_ph:"เช่น 7-Eleven",category:"หมวด",method:"จ่ายด้วย",m_cash:"เงินสด",m_transfer:"สแกน / โอน",m_card:"บัตร",date:"วันที่",note:"หมายเหตุ",save:"บันทึก",cancel:"ยกเลิก",delete:"ลบ",close:"ปิด",
 confirm_delete:"ลบรายการนี้หรือไม่",retry:"ลองอีกครั้ง",ai_fail:"ตอนนี้ AI ยุ่งอยู่ รอสักครู่แล้วกดลองอีกครั้ง หรือกรอกเองได้",ai_items:"สิ่งที่ AI อ่านได้",ai_check:"ตรวจสอบจำนวนเงินก่อนบันทึก",unreadable:"ไม่พบราคาในรูปนี้ กรอกเองได้",
 c_food:"อาหาร",c_drink:"เครื่องดื่ม",c_groceries:"ของใช้",c_transport:"เดินทาง",c_shopping:"ช้อปปิ้ง",c_bills:"บิล",c_health:"สุขภาพ",c_fun:"บันเทิง",c_other:"อื่นๆ",
-settings:"การตั้งค่า",language:"ภาษา",theme:"ธีม",th_auto:"อัตโนมัติ",th_light:"สว่าง",th_dark:"มืด",show_src:"แสดงว่า AI ตัวไหนอ่านแต่ละรายการ",clear_all:"ลบข้อมูลทั้งหมดของฉัน",confirm_clear:"ลบข้อมูลทั้งหมดในเครื่องนี้หรือไม่",saved:"บันทึกแล้ว",saved_n:"บันทึก {n} รายการแล้ว",today:"วันนี้",yesterday:"เมื่อวาน",manual:"กรอกเอง",version:"เวอร์ชัน {v}",tab_spend:"รายจ่าย",tab_want:"อยากได้",saved_pause:"ประหยัดได้จากการรอ",saved_sub:"{n} อย่างที่ตัดสินใจไม่ซื้อ",saved_none:"ถ้าเลือกไม่ซื้อหลังรอครบเวลา เงินที่ประหยัดได้จะแสดงที่นี่",waiting_now:"กำลังรอ",wage_tile:"รายได้ต่อชั่วโมง",wage_unset:"แตะเพื่อตั้งค่า",want_hint:"อยากซื้อของออนไลน์ใช่ไหม แคปหน้าจอเก็บไว้ก่อนแล้วรอสักพัก",wish_shot:"เพิ่มภาพหน้าจอ",wish_manual:"เพิ่มเอง",wish_empty:"ยังไม่มีของที่อยากได้",wish_empty_hint:"ครั้งหน้าก่อนกดซื้อ แคปหน้าจอแล้วเพิ่มที่นี่แทน",new_wish:"หยุดคิดก่อนซื้อ",wish_detail:"ของที่อยากได้",item:"ของอะไร",item_ph:"เช่น หูฟังไร้สาย",price:"ราคาที่ต้องจ่าย",store:"ร้านหรือแอป",wait_for:"รอนานแค่ไหน",d1:"1 วัน",d2:"2 วัน",d3:"3 วัน",start_pause:"เริ่มรอ",ask_q:"ให้ AI ถามคำถาม",ask_yourself:"ถามตัวเอง",left_h:"เหลือ {n} ชม.",left_m:"เหลือ {n} นาที",ready:"ครบเวลาแล้ว ยังอยากได้อยู่ไหม",still_want:"ยังอยากได้",skip_it:"ไม่ซื้อแล้ว",skip_now:"ไม่ต้องการแล้ว",bought_on:"ซื้อแล้ว · {d}",skipped_on:"ไม่ซื้อ · {d}",sec_ready:"ตัดสินใจได้แล้ว",sec_wait:"กำลังรอ",sec_done:"ตัดสินใจแล้ว",hours_work:"≈ ทำงาน {h}",hrs:"{n} ชม.",mins:"{n} นาที",wage_title:"รายได้ต่อชั่วโมง",wage_hint:"ราคาจะแสดงเป็นจำนวนชั่วโมงที่คุณต้องทำงานด้วย ใส่รายได้ต่อชั่วโมงหลังหักภาษี ถ้ายังไม่ทำงาน ใช้ค่าขนมหารด้วยชั่วโมงเรียน",wage_label:"ฉันได้ชั่วโมงละ",skipped_toast:"เลือกได้ดี {a} ยังอยู่ในกระเป๋า",bought_toast:"ตรวจรายละเอียดแล้วบันทึกเป็นรายจ่าย",need_item:"ใส่ชื่อหรือราคาก่อน",busy_wish:"ตอนนี้ AI ยุ่งอยู่ แต่ยังเริ่มรอได้",th_flow:"Flow ยามค่ำ",th_cream:"ครีม",th_olive:"เขียวมะกอก",th_rose:"ชมพูกุหลาบ",th_purple:"ม่วงเข้ม",tab_insight:"วิเคราะห์",currency:"สกุลเงิน",main_cur:"สกุลเงินหลัก (ใช้คิดยอดรวม)",wallet_also:"อื่นๆ: {list}",goal_title:"เป้าหมายการออม",goal_hint:"เงินที่ประหยัดได้จากการเลือกไม่ซื้อหลังรอครบเวลา จะนับเข้าเป้าหมายนี้",goal_name:"เก็บเงินเพื่ออะไร",goal_amount:"จำนวนเป้าหมาย",goal_set:"ตั้งเป้าหมายการออม",goal_set_hint:"เช่น ตั๋วกลับบ้าน หรือโน้ตบุ๊กใหม่",goal_prog:"{a} / {b}",goal_pct:"ถึงแล้ว {p}%",goal_done:"ถึงเป้าหมายแล้ว",goal_closer:"ใกล้ {g} อีก {a}",regret_q:"เมื่อ {d}ก่อนคุณซื้อ {x} คุ้มไหม",f_worth:"คุ้ม",f_okay:"เฉยๆ",f_regret:"เสียดาย",feel_saved:"ขอบคุณ โค้ชจะเรียนรู้จากสิ่งนี้",ins_month:"เดือนนี้ใช้ไป",ins_vs:"เทียบเดือนก่อนช่วงเดียวกัน",ins_avg:"เฉลี่ยต่อวัน",ins_cats:"เงินไปไหน",ins_pay:"จ่ายด้วยอะไร",ins_want:"รายการอยากได้",ins_skipped:"ไม่ซื้อ",ins_bought:"ซื้อ",ins_regret_rate:"เสียดาย",ins_empty:"บันทึกรายจ่ายสักหน่อยแล้วจะเห็นการวิเคราะห์",coach_title:"โค้ชประจำสัปดาห์",coach_btn:"ขอคำแนะนำสัปดาห์นี้",pattern_title:"รูปแบบการซื้อของคุณ",pattern_btn:"หารูปแบบของฉัน",pattern_need:"ให้คะแนนของที่ซื้อหลังรอครบเวลาอย่างน้อย 2 อย่างเพื่อใช้ส่วนนี้",updated_on:"อัปเดต {d}",rates_note:"สกุลเงินอื่นคิดตามอัตราแลกเปลี่ยนวันนี้",demo_mode:"โหมดสาธิต (1 วัน = 1 นาที)",demo_on:"โหมดสาธิต: 1 วัน = 1 นาที",open_phone:"เปิดบนมือถือ",install_hint:"สแกนด้วยกล้องมือถือ iPhone กดแชร์ > เพิ่มไปยังหน้าจอโฮม Android กดเมนู > ติดตั้งแอป",share_app:"แชร์ลิงก์",check_update:"ตรวจหาอัปเดต",pull:"ดึงลงเพื่ออัปเดต",release:"ปล่อยเพื่ออัปเดต",updating:"กำลังอัปเดต...",up_to_date:"เป็นเวอร์ชันล่าสุดแล้ว",new_version:"อัปเดตเป็นเวอร์ชันล่าสุดแล้ว",days:"{n} วัน",mic_no:"ใช้เสียงที่นี่ไม่ได้ ใช้ไมโครโฟนบนคีย์บอร์ดแทน"}
+settings:"การตั้งค่า",language:"ภาษา",theme:"ธีม",th_auto:"อัตโนมัติ",th_light:"สว่าง",th_dark:"มืด",show_src:"แสดงว่า AI ตัวไหนอ่านแต่ละรายการ",clear_all:"ลบข้อมูลทั้งหมดของฉัน",confirm_clear:"ลบข้อมูลทั้งหมดในเครื่องนี้หรือไม่",saved:"บันทึกแล้ว",saved_n:"บันทึก {n} รายการแล้ว",today:"วันนี้",yesterday:"เมื่อวาน",manual:"กรอกเอง",version:"เวอร์ชัน {v}",tab_spend:"รายจ่าย",tab_want:"อยากได้",saved_pause:"ประหยัดได้จากการรอ",saved_sub:"{n} อย่างที่ตัดสินใจไม่ซื้อ",saved_none:"ถ้าเลือกไม่ซื้อหลังรอครบเวลา เงินที่ประหยัดได้จะแสดงที่นี่",waiting_now:"กำลังรอ",wage_tile:"รายได้ต่อชั่วโมง",wage_unset:"แตะเพื่อตั้งค่า",want_hint:"อยากซื้อของออนไลน์ใช่ไหม แคปหน้าจอเก็บไว้ก่อนแล้วรอสักพัก",wish_shot:"เพิ่มภาพหน้าจอ",wish_manual:"เพิ่มเอง",wish_empty:"ยังไม่มีของที่อยากได้",wish_empty_hint:"ครั้งหน้าก่อนกดซื้อ แคปหน้าจอแล้วเพิ่มที่นี่แทน",new_wish:"หยุดคิดก่อนซื้อ",wish_detail:"ของที่อยากได้",item:"ของอะไร",item_ph:"เช่น หูฟังไร้สาย",price:"ราคาที่ต้องจ่าย",store:"ร้านหรือแอป",wait_for:"รอนานแค่ไหน",d1:"1 วัน",d2:"2 วัน",d3:"3 วัน",start_pause:"เริ่มรอ",ask_q:"ให้ AI ถามคำถาม",ask_yourself:"ถามตัวเอง",left_h:"เหลือ {n} ชม.",left_m:"เหลือ {n} นาที",ready:"ครบเวลาแล้ว ยังอยากได้อยู่ไหม",still_want:"ยังอยากได้",skip_it:"ไม่ซื้อแล้ว",skip_now:"ไม่ต้องการแล้ว",bought_on:"ซื้อแล้ว · {d}",skipped_on:"ไม่ซื้อ · {d}",sec_ready:"ตัดสินใจได้แล้ว",sec_wait:"กำลังรอ",sec_done:"ตัดสินใจแล้ว",hours_work:"≈ ทำงาน {h}",hrs:"{n} ชม.",mins:"{n} นาที",wage_title:"รายได้ต่อชั่วโมง",wage_hint:"ราคาจะแสดงเป็นจำนวนชั่วโมงที่คุณต้องทำงานด้วย ใส่รายได้ต่อชั่วโมงหลังหักภาษี ถ้ายังไม่ทำงาน ใช้ค่าขนมหารด้วยชั่วโมงเรียน",wage_label:"ฉันได้ชั่วโมงละ",skipped_toast:"เลือกได้ดี {a} ยังอยู่ในกระเป๋า",bought_toast:"ตรวจรายละเอียดแล้วบันทึกเป็นรายจ่าย",need_item:"ใส่ชื่อหรือราคาก่อน",busy_wish:"ตอนนี้ AI ยุ่งอยู่ แต่ยังเริ่มรอได้",th_flow:"Flow ยามค่ำ",th_cream:"ครีม",th_olive:"เขียวมะกอก",th_rose:"ชมพูกุหลาบ",th_purple:"ม่วงเข้ม",tab_insight:"วิเคราะห์",currency:"สกุลเงิน",main_cur:"สกุลเงินหลัก (ใช้คิดยอดรวม)",wallet_also:"อื่นๆ: {list}",goal_title:"เป้าหมายการออม",goal_hint:"เงินที่ประหยัดได้จากการเลือกไม่ซื้อหลังรอครบเวลา จะนับเข้าเป้าหมายนี้",goal_name:"เก็บเงินเพื่ออะไร",goal_amount:"จำนวนเป้าหมาย",goal_set:"ตั้งเป้าหมายการออม",goal_set_hint:"เช่น ตั๋วกลับบ้าน หรือโน้ตบุ๊กใหม่",goal_prog:"{a} / {b}",goal_pct:"ถึงแล้ว {p}%",goal_done:"ถึงเป้าหมายแล้ว",goal_closer:"ใกล้ {g} อีก {a}",regret_q:"เมื่อ {d}ก่อนคุณซื้อ {x} คุ้มไหม",f_worth:"คุ้ม",f_okay:"เฉยๆ",f_regret:"เสียดาย",feel_saved:"ขอบคุณ โค้ชจะเรียนรู้จากสิ่งนี้",ins_month:"เดือนนี้ใช้ไป",ins_vs:"เทียบเดือนก่อนช่วงเดียวกัน",ins_avg:"เฉลี่ยต่อวัน",ins_cats:"เงินไปไหน",ins_pay:"จ่ายด้วยอะไร",ins_want:"รายการอยากได้",ins_skipped:"ไม่ซื้อ",ins_bought:"ซื้อ",ins_regret_rate:"เสียดาย",ins_empty:"บันทึกรายจ่ายสักหน่อยแล้วจะเห็นการวิเคราะห์",coach_title:"โค้ชประจำสัปดาห์",coach_btn:"ขอคำแนะนำสัปดาห์นี้",pattern_title:"รูปแบบการซื้อของคุณ",pattern_btn:"หารูปแบบของฉัน",pattern_need:"ให้คะแนนของที่ซื้อหลังรอครบเวลาอย่างน้อย 2 อย่างเพื่อใช้ส่วนนี้",updated_on:"อัปเดต {d}",rates_note:"สกุลเงินอื่นคิดตามอัตราแลกเปลี่ยนวันนี้",demo_mode:"โหมดสาธิต (1 วัน = 1 นาที)",demo_on:"โหมดสาธิต: 1 วัน = 1 นาที",open_phone:"เปิดบนมือถือ",install_hint:"สแกนด้วยกล้องมือถือ iPhone กดแชร์ > เพิ่มไปยังหน้าจอโฮม Android กดเมนู > ติดตั้งแอป",share_app:"แชร์ลิงก์",check_update:"ตรวจหาอัปเดต",pull:"ดึงลงเพื่ออัปเดต",release:"ปล่อยเพื่ออัปเดต",updating:"กำลังอัปเดต...",up_to_date:"เป็นเวอร์ชันล่าสุดแล้ว",new_version:"อัปเดตเป็นเวอร์ชันล่าสุดแล้ว",days:"{n} วัน",tab_friends:"เพื่อน",acct_title:"บัญชีและซิงก์",acct_hint:"ลงชื่อเข้าใช้เพื่อสำรองข้อมูลและใช้บนมือถือเครื่องอื่น รูปภาพจะอยู่ในเครื่องนี้เท่านั้น",email:"อีเมล",password:"รหัสผ่าน (อย่างน้อย 6 ตัว)",sign_in:"เข้าสู่ระบบ",sign_up:"สร้างบัญชี",sign_out:"ออกจากระบบ",signed_as:"เข้าสู่ระบบแล้ว: {e}",sync_now:"ซิงก์ตอนนี้",synced_at:"ซิงก์ล่าสุด {d}",syncing:"กำลังซิงก์...",sync_off:"เว็บนี้ยังไม่ได้ตั้งค่าการซิงก์",check_email:"เช็กอีเมลแล้วกดลิงก์ยืนยัน จากนั้นกลับมาเข้าสู่ระบบ",fr_title:"ชาเลนจ์ออมเงิน",fr_hint:"หยุดคิดก่อนซื้อไปด้วยกัน เพื่อนจะเห็นแค่ว่าแต่ละคนประหยัดได้เท่าไร ไม่เห็นว่าคุณซื้ออะไร",fr_login:"เข้าสู่ระบบเพื่อเริ่มชาเลนจ์ออมเงินกับเพื่อน",your_name:"ชื่อของคุณ (เพื่อนจะเห็น)",fr_create:"เริ่มชาเลนจ์",fr_join:"เข้าร่วมด้วยรหัส",fr_code:"รหัสชาเลนจ์",ch_name:"ชื่อชาเลนจ์",ch_name_ph:"เช่น พฤศจิกาไม่ช้อปออนไลน์",ch_len:"นานแค่ไหน",w1:"1 สัปดาห์",w2:"2 สัปดาห์",w4:"1 เดือน",create:"สร้าง",join:"เข้าร่วม",ch_ends:"เหลือ {n} วัน",ch_ended:"จบแล้ว",ch_share:"ชวนเพื่อน",ch_invite:"มาเล่นชาเลนจ์ออมเงิน Pocket Coach \"{n}\" กัน รหัส: {c}",ch_leave:"ออก",you:"คุณ",ch_none:"ยังไม่มีชาเลนจ์ เริ่มใหม่หรือเข้าร่วมของเพื่อน",need_name:"ใส่ชื่อก่อน",skipped_n:"ไม่ซื้อ {n} อย่าง",share_card:"แชร์การ์ดเงินที่ประหยัดได้",card_saved:"ประหยัดได้จากการหยุดคิดก่อนซื้อ",card_skipped:"{n} อย่างที่ตัดสินใจไม่ซื้อ",card_goal:"เก็บเงินเพื่อ {g}: {p}%",card_cta:"หยุดคิดก่อนซื้อ",mic_no:"ใช้เสียงที่นี่ไม่ได้ ใช้ไมโครโฟนบนคีย์บอร์ดแทน"}
 };
 const LANGS = { zh:"繁體中文", en:"English", th:"ไทย" };
 const LOC = { en:"en-US", zh:"zh-TW", th:"th-TH-u-ca-gregory" };
@@ -291,7 +303,8 @@ const THEMES = { flow:"linear-gradient(135deg,#2f54ff,#8b3dff)", auto:"linear-gr
 // ===== STATE =====
 const $ = id => document.getElementById(id);
 const lsGet = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } };
-const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { toast("Storage full"); return false; } };
+const SYNC_KEYS = ["pc_exp", "pc_wish", "pc_wallets", "pc_goal", "pc_wage", "pc_main", "pc_del", "pc_name"], SETTING_KEYS = ["pc_wallets", "pc_goal", "pc_wage", "pc_main", "pc_name"];
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); if (SETTING_KEYS.includes(k)) localStorage.setItem("pc_setts", String(Date.now())); if (SYNC_KEYS.includes(k) && typeof markDirty === "function") markDirty(); return true; } catch (e) { toast("Storage full"); return false; } };
 const navLang = (navigator.language || "").toLowerCase();
 let lang = lsGet("pc_lang", navLang.startsWith("th") ? "th" : navLang.startsWith("zh") ? "zh" : "en");
 let theme = lsGet("pc_theme", "flow");
@@ -310,6 +323,8 @@ let rates = lsGet("pc_rates", null);
 let goal = lsGet("pc_goal", null); // { name, amount, cur }
 let demo = lsGet("pc_demo", false);
 let coach = lsGet("pc_coach", null), pattern = lsGet("pc_pattern", null);
+let dels = lsGet("pc_del", []), myName = lsGet("pc_name", "");
+const tomb = id => { dels = dels.concat([id]).slice(-500); lsSet("pc_del", dels); };
 const dayMs = () => demo ? 60000 : DAY;
 const saveExps = () => lsSet("pc_exp", exps);
 
@@ -484,7 +499,7 @@ $("quickBody").addEventListener("click", e => {
   if (b.dataset.act === "retry") { quickParse(qd.text); return; }
   if (b.dataset.act === "saveall") {
     const now = Date.now();
-    const add = qd.entries.filter(x => x.on && Number(x.amount) > 0).map((x, i) => ({ id: uid(), ts: now + i, amount: Math.round(Number(x.amount) * 100) / 100, currency: x.currency || lastCur, merchant: String(x.item || "").trim(), category: CATS.includes(x.category) ? x.category : "other", method: METHODS.includes(x.method) ? x.method : "cash", note: "", items: [], thumb: "", by: qd.by }));
+    const add = qd.entries.filter(x => x.on && Number(x.amount) > 0).map((x, i) => ({ id: uid(), u: now, ts: now + i, amount: Math.round(Number(x.amount) * 100) / 100, currency: x.currency || lastCur, merchant: String(x.item || "").trim(), category: CATS.includes(x.category) ? x.category : "other", method: METHODS.includes(x.method) ? x.method : "cash", note: "", items: [], thumb: "", by: qd.by }));
     if (add.length) { lastCur = add[add.length - 1].currency; lsSet("pc_lastcur", lastCur); }
     exps = exps.concat(add); saveExps(); $("quickIn").value = ""; closeQuick(); renderAll(); toast(t("saved_n", { n: add.length }));
   }
@@ -571,12 +586,12 @@ $("expBody").addEventListener("click", e => {
   if (a === "close") closeExp();
   if (a === "rescan") scanReceipt();
   if (a === "save") saveExp();
-  if (a === "del" && confirm(t("confirm_delete"))) { exps = exps.filter(x => x.id !== ed.editId); saveExps(); closeExp(); renderAll(); }
+  if (a === "del" && confirm(t("confirm_delete"))) { tomb(ed.editId); exps = exps.filter(x => x.id !== ed.editId); saveExps(); closeExp(); renderAll(); }
 });
 function saveExp() {
   const amt = Math.round(Number(ed.amount) * 100) / 100;
   if (!(amt > 0)) { $("eAmt") && $("eAmt").focus(); return; }
-  const rec = { id: ed.editId || uid(), ts: ed.ts, amount: amt, currency: ed.currency || "THB", merchant: String(ed.merchant || "").trim(), category: CATS.includes(ed.category) ? ed.category : "other", method: METHODS.includes(ed.method) ? ed.method : "cash", note: String(ed.note || "").trim(), items: ed.items || [], thumb: ed.thumb || "", by: ed.by || "", wishId: ed.wishId || "" };
+  const rec = { id: ed.editId || uid(), u: Date.now(), ts: ed.ts, amount: amt, currency: ed.currency || "THB", merchant: String(ed.merchant || "").trim(), category: CATS.includes(ed.category) ? ed.category : "other", method: METHODS.includes(ed.method) ? ed.method : "cash", note: String(ed.note || "").trim(), items: ed.items || [], thumb: ed.thumb || "", by: ed.by || "", wishId: ed.wishId || "" };
   if (ed.editId) exps = exps.map(x => x.id === ed.editId ? rec : x); else exps.push(rec);
   if (!saveExps()) { rec.thumb = ""; saveExps(); }
   lastCur = rec.currency; lsSet("pc_lastcur", lastCur);
@@ -718,18 +733,18 @@ $("wishBody").addEventListener("click", e => {
     const price = Math.round(Number(wd.price) * 100) / 100;
     if (!wd.item.trim() && !(price > 0)) { toast(t("need_item")); return; }
     const now = Date.now();
-    wishes.push({ id: uid(), ts: now, until: now + wd.days * dayMs(), item: wd.item.trim(), price: price > 0 ? price : 0, currency: wd.currency || "THB", store: wd.store.trim(), category: wd.category, questions: wd.questions, tip: wd.tip, thumb: wd.thumb, status: "wait", decidedTs: 0, by: wd.by });
+    wishes.push({ id: uid(), u: now, ts: now, until: now + wd.days * dayMs(), item: wd.item.trim(), price: price > 0 ? price : 0, currency: wd.currency || "THB", store: wd.store.trim(), category: wd.category, questions: wd.questions, tip: wd.tip, thumb: wd.thumb, status: "wait", decidedTs: 0, by: wd.by });
     if (!saveWishes()) { wishes[wishes.length - 1].thumb = ""; saveWishes(); }
     closeWish(); renderAll(); toast(t("saved")); return;
   }
   const w = wishes.find(x => x.id === wd.view); if (!w) return;
-  if (a === "skip") { w.status = "skipped"; w.decidedTs = Date.now(); saveWishes(); closeWish(); renderAll(); toast(t("skipped_toast", { a: money(w.price, w.currency) }) + (goal ? " · " + t("goal_closer", { a: money(w.price, w.currency), g: goal.name }) : "")); }
+  if (a === "skip") { w.status = "skipped"; w.decidedTs = w.u = Date.now(); saveWishes(); closeWish(); renderAll(); toast(t("skipped_toast", { a: money(w.price, w.currency) }) + (goal ? " · " + t("goal_closer", { a: money(w.price, w.currency), g: goal.name }) : "")); }
   if (a === "buy") {
-    w.status = "bought"; w.decidedTs = Date.now(); saveWishes(); closeWish(); renderAll(); showTab("Spend");
+    w.status = "bought"; w.decidedTs = w.u = Date.now(); saveWishes(); closeWish(); renderAll(); showTab("Spend");
     openExp({ prefill: { amount: w.price || "", currency: w.currency, merchant: w.item, category: w.category, method: "transfer", wishId: w.id, thumb: w.thumb } });
     toast(t("bought_toast"));
   }
-  if (a === "wdel" && confirm(t("confirm_delete"))) { wishes = wishes.filter(x => x.id !== w.id); saveWishes(); closeWish(); renderAll(); }
+  if (a === "wdel" && confirm(t("confirm_delete"))) { tomb(w.id); wishes = wishes.filter(x => x.id !== w.id); saveWishes(); closeWish(); renderAll(); }
 });
 onFile($("fWish"), wishFromPhoto);
 $("btnWishManual").onclick = () => openWish();
@@ -761,7 +776,7 @@ function renderRegret() {
 $("regretBox").addEventListener("click", e => {
   const b = e.target.closest("[data-feel]"); if (!b) return;
   const w = wishes.find(x => x.id === b.closest("[data-rid]").dataset.rid); if (!w) return;
-  w.feel = b.dataset.feel; w.feelTs = Date.now(); saveWishes(); pattern = null; lsSet("pc_pattern", null); renderAll(); toast(t("feel_saved"));
+  w.feel = b.dataset.feel; w.feelTs = w.u = Date.now(); saveWishes(); pattern = null; lsSet("pc_pattern", null); renderAll(); toast(t("feel_saved"));
 });
 
 // ===== INSIGHTS AND COACH =====
@@ -865,6 +880,231 @@ document.addEventListener("touchmove", e => {
 }, { passive: true });
 document.addEventListener("touchend", () => { if (ptrStart == null) return; ptrStart = null; if (ptrDist > 120) doUpdate(); else $("ptr").style.transform = ""; });
 
+// ===== ACCOUNT AND SYNC (Supabase) =====
+let sb = null, user = null, syncOff = false, syncing = false, dirty = false, syncTimer = null, lastSync = lsGet("pc_lastsync", 0), acctMsg = "";
+function markDirty() { dirty = true; if (!user) return; clearTimeout(syncTimer); syncTimer = setTimeout(() => syncNow(), 2500); }
+function loadScript(src) { return new Promise((ok, no) => { const el = document.createElement("script"); el.src = src; el.onload = ok; el.onerror = no; document.head.appendChild(el); }); }
+async function initSync() {
+  try {
+    const cfg = await (await fetch("/api/config")).json();
+    if (!cfg.supabaseUrl) { syncOff = true; renderFriends(); return; }
+    await loadScript("https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.116.0/dist/umd/supabase.js");
+    sb = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseKey, { auth: { persistSession: true, autoRefreshToken: true } });
+    const { data } = await sb.auth.getSession();
+    user = data.session ? data.session.user : null;
+    sb.auth.onAuthStateChange((ev, session) => {
+      const was = user && user.id; user = session ? session.user : null;
+      if (user && user.id !== was) syncNow();
+      renderAcct(); renderFriends();
+    });
+    renderAcct(); renderFriends();
+    if (user) syncNow();
+  } catch (e) { syncOff = true; renderAcct(); renderFriends(); }
+}
+const strip = list => list.map(x => { const o = Object.assign({}, x); delete o.thumb; return o; });
+function mergeList(local, remote, gone) {
+  const m = {};
+  local.concat(remote || []).forEach(x => {
+    if (!x || !x.id || gone.has(x.id)) return;
+    const old = m[x.id];
+    if (!old || (x.u || x.ts || 0) > (old.u || old.ts || 0)) m[x.id] = Object.assign({}, x, { thumb: x.thumb || (old && old.thumb) || "" });
+    else if (!old.thumb && x.thumb) old.thumb = x.thumb;
+  });
+  return Object.values(m);
+}
+const rawSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} };
+async function syncNow(manual) {
+  if (!sb || !user || syncing) return;
+  syncing = true; dirty = false; renderAcct();
+  try {
+    const { data: row, error } = await sb.from("user_data").select("data").eq("user_id", user.id).maybeSingle();
+    if (error) throw error;
+    const r = (row && row.data) || {};
+    const gone = new Set(dels.concat(r.del || []));
+    dels = Array.from(gone).slice(-500);
+    exps = mergeList(exps, r.exps, gone); wishes = mergeList(wishes, r.wishes, gone);
+    const localSet = Number(localStorage.getItem("pc_setts") || 0);
+    if ((r.settingsAt || 0) > localSet) {
+      if (r.wallets) wallets = r.wallets; if ("goal" in r) goal = r.goal; if (r.wage != null) wage = r.wage; if (r.mainCur) mainCur = r.mainCur; if (r.name) myName = r.name;
+      ["pc_wallets", wallets, "pc_goal", goal, "pc_wage", wage, "pc_main", mainCur, "pc_name", myName].forEach((v, i, a) => { if (i % 2 === 0) rawSet(v, a[i + 1]); });
+      localStorage.setItem("pc_setts", String(r.settingsAt));
+    }
+    rawSet("pc_exp", exps); rawSet("pc_wish", wishes); rawSet("pc_del", dels);
+    const blob = { v: 1, exps: strip(exps), wishes: strip(wishes), del: dels, wallets, goal, wage, mainCur, name: myName, settingsAt: Number(localStorage.getItem("pc_setts") || 0), savedAt: Date.now() };
+    const { error: e2 } = await sb.from("user_data").upsert({ user_id: user.id, data: blob, updated_at: new Date().toISOString() });
+    if (e2) throw e2;
+    lastSync = Date.now(); rawSet("pc_lastsync", lastSync);
+    await pushChallengeScores();
+    if (manual) toast(t("saved"));
+  } catch (e) { toast(String(e.message || e).slice(0, 120)); }
+  syncing = false; applyLang();
+  if (dirty) markDirty();
+}
+function renderAcct() {
+  const box = $("acctBody"); if (!box) return;
+  let h = '<div class="hd"><h3>' + esc(t("acct_title")) + '</h3><button class="btn sec" data-close-acct>' + esc(t("close")) + "</button></div>";
+  if (syncOff) h += '<p class="muted">' + esc(t("sync_off")) + "</p>";
+  else if (!sb) h += '<div class="spin"><i></i>' + esc(t("reading")) + "</div>";
+  else if (user) {
+    h += '<p style="margin-top:0"><b>' + esc(t("signed_as", { e: user.email || "" })) + "</b></p>" +
+      (lastSync ? '<p class="muted">' + esc(t("synced_at", { d: new Date(lastSync).toLocaleString(LOC[lang], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) })) + "</p>" : "") +
+      '<button class="btn full" data-acct="sync"' + (syncing ? " disabled" : "") + ">" + esc(t(syncing ? "syncing" : "sync_now")) + "</button>" +
+      '<button class="btn warn full" data-acct="out">' + esc(t("sign_out")) + "</button>";
+  } else {
+    h += '<p class="muted" style="margin-top:0">' + esc(t("acct_hint")) + "</p>" + (acctMsg ? '<div class="ai">' + esc(acctMsg) + "</div>" : "") +
+      '<div class="fld"><label>' + esc(t("email")) + '</label><input id="aEmail" type="email" autocomplete="email"></div>' +
+      '<div class="fld"><label>' + esc(t("password")) + '</label><input id="aPass" type="password" autocomplete="current-password"></div>' +
+      '<button class="btn full" data-acct="in">' + esc(t("sign_in")) + '</button><button class="btn sec full" data-acct="up">' + esc(t("sign_up")) + "</button>";
+  }
+  const keepE = $("aEmail") ? $("aEmail").value : "";
+  box.innerHTML = h;
+  if ($("aEmail") && keepE) $("aEmail").value = keepE;
+}
+const openAcct = () => { renderAcct(); $("sheetAcct").classList.add("open"); };
+$("btnAcct").onclick = () => { $("sheetSet").classList.remove("open"); openAcct(); };
+$("acctBody").addEventListener("click", async e => {
+  if (e.target.closest("[data-close-acct]")) { $("sheetAcct").classList.remove("open"); return; }
+  const b = e.target.closest("[data-acct]"); if (!b || !sb) return;
+  const a = b.dataset.acct;
+  if (a === "sync") return syncNow(true);
+  if (a === "out") { await sb.auth.signOut(); user = null; renderAcct(); renderFriends(); return; }
+  const email = $("aEmail").value.trim(), password = $("aPass").value;
+  if (!email || password.length < 6) { toast(t("password")); return; }
+  b.disabled = true; acctMsg = "";
+  try {
+    const res = a === "in" ? await sb.auth.signInWithPassword({ email, password }) : await sb.auth.signUp({ email, password });
+    if (res.error) throw res.error;
+    if (a === "up" && !res.data.session) acctMsg = t("check_email");
+    else { $("sheetAcct").classList.remove("open"); toast(t("signed_as", { e: email })); }
+  } catch (err) { toast(String(err.message || err).slice(0, 120)); }
+  renderAcct();
+});
+
+// ===== SAVING CHALLENGE WITH FRIENDS =====
+let myCh = [], chBusy = false, frForm = "";
+async function loadChallenges() {
+  if (!sb || !user) { myCh = []; return; }
+  const { data: mine, error } = await sb.from("challenge_members").select("challenge_id").eq("user_id", user.id);
+  if (error) throw error;
+  const ids = (mine || []).map(x => x.challenge_id);
+  if (!ids.length) { myCh = []; return; }
+  const [{ data: chs }, { data: mem }] = await Promise.all([sb.from("challenges").select("*").in("id", ids), sb.from("challenge_members").select("*").in("challenge_id", ids)]);
+  myCh = (chs || []).map(c => Object.assign(c, { members: (mem || []).filter(m => m.challenge_id === c.id).sort((a, b) => b.saved - a.saved) })).sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+}
+function myScore(c) {
+  const from = new Date(c.created_at).getTime(), to = new Date(c.ends_at).getTime();
+  const list = wishes.filter(w => w.status === "skipped" && w.decidedTs >= from && w.decidedTs <= to);
+  return { saved: Math.round(list.reduce((s, w) => s + conv(w.price, w.currency || "THB", c.currency), 0)), skipped: list.length };
+}
+async function pushChallengeScores() {
+  try {
+    await loadChallenges();
+    for (const c of myCh) {
+      if (new Date(c.ends_at).getTime() < Date.now() - DAY) continue;
+      const sc = myScore(c);
+      const me = c.members.find(m => m.user_id === user.id);
+      if (me && (me.saved !== sc.saved || me.skipped !== sc.skipped || (myName && me.display_name !== myName))) {
+        await sb.from("challenge_members").update({ saved: sc.saved, skipped: sc.skipped, display_name: myName || me.display_name, updated_at: new Date().toISOString() }).eq("challenge_id", c.id).eq("user_id", user.id);
+        Object.assign(me, sc);
+      }
+    }
+  } catch (e) {}
+  renderFriends();
+}
+function renderFriends() {
+  const box = $("frBody"); if (!box) return;
+  let h = '<div class="card"><h4>' + esc(t("fr_title")) + '</h4><p class="muted" style="margin:0">' + esc(t("fr_hint")) + "</p></div>";
+  if (syncOff) h += '<p class="muted">' + esc(t("sync_off")) + "</p>";
+  else if (!sb) h += '<div class="spin"><i></i>' + esc(t("reading")) + "</div>";
+  else if (!user) h += '<div class="card"><p style="margin-top:0">' + esc(t("fr_login")) + '</p><button class="btn full" data-fr="login">' + esc(t("sign_in")) + "</button></div>";
+  else {
+    h += '<div class="fld"><label>' + esc(t("your_name")) + '</label><input id="frName" maxlength="30" value="' + esc(myName) + '"></div>';
+    if (frForm === "create") h += '<div class="card"><h4>' + esc(t("fr_create")) + '</h4><div class="fld"><label>' + esc(t("ch_name")) + '</label><input id="chName" maxlength="40" placeholder="' + esc(t("ch_name_ph")) + '"></div>' +
+      '<div class="fld"><label>' + esc(t("ch_len")) + '</label><select id="chLen"><option value="7">' + esc(t("w1")) + '</option><option value="14">' + esc(t("w2")) + '</option><option value="30">' + esc(t("w4")) + "</option></select></div>" +
+      '<div class="two"><button class="btn sec" data-fr="cancel">' + esc(t("cancel")) + '</button><button class="btn" data-fr="docreate">' + esc(t("create")) + "</button></div></div>";
+    else if (frForm === "join") h += '<div class="card"><h4>' + esc(t("fr_join")) + '</h4><div class="fld"><label>' + esc(t("fr_code")) + '</label><input id="chCode" maxlength="8" style="text-transform:uppercase;letter-spacing:.15em" autocapitalize="characters"></div>' +
+      '<div class="two"><button class="btn sec" data-fr="cancel">' + esc(t("cancel")) + '</button><button class="btn" data-fr="dojoin">' + esc(t("join")) + "</button></div></div>";
+    else h += '<div class="acts"><button class="btn gold" data-fr="create">' + esc(t("fr_create")) + '</button><button class="btn sec" data-fr="join">' + esc(t("fr_join")) + "</button></div>";
+    if (chBusy) h += '<div class="spin"><i></i>' + esc(t("reading")) + "</div>";
+    if (!myCh.length && !chBusy) h += '<p class="muted" style="text-align:center">' + esc(t("ch_none")) + "</p>";
+    myCh.forEach(c => {
+      const left = Math.ceil((new Date(c.ends_at).getTime() - Date.now()) / DAY);
+      h += '<div class="card"><div style="display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:6px"><h4 style="margin:0">' + esc(c.name) + '</h4><span class="code">' + esc(c.code) + "</span></div>" +
+        '<p class="muted" style="margin:0 0 6px">' + esc(left > 0 ? t("ch_ends", { n: left }) : t("ch_ended")) + "</p>" +
+        c.members.map((m, i) => '<div class="lb"><span class="rk' + (i === 0 && m.saved > 0 ? " r1" : "") + '">' + (i + 1) + '</span><span class="nm">' + esc(m.display_name) + (m.user_id === user.id ? " <small>(" + esc(t("you")) + ")</small>" : "") + "<br><small>" + esc(t("skipped_n", { n: m.skipped })) + '</small></span><span class="amt">' + esc(money(Number(m.saved), c.currency)) + "</span></div>").join("") +
+        '<div class="two" style="margin-top:8px"><button class="btn sec" data-fr="invite" data-c="' + esc(c.id) + '">' + esc(t("ch_share")) + '</button><button class="btn warn" data-fr="leave" data-c="' + esc(c.id) + '">' + esc(t("ch_leave")) + "</button></div></div>";
+    });
+  }
+  h += '<button class="btn sec full" data-fr="card">' + esc(t("share_card")) + "</button>";
+  const keep = {}; ["chName", "chCode"].forEach(id => { if ($(id)) keep[id] = $(id).value; });
+  box.innerHTML = h;
+  Object.keys(keep).forEach(id => { if ($(id)) $(id).value = keep[id]; });
+}
+$("frBody").addEventListener("input", e => { if (e.target.id === "frName") { myName = e.target.value.trim(); lsSet("pc_name", myName); } });
+const newCode = () => { const A = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; let c = ""; const r = crypto.getRandomValues(new Uint8Array(6)); r.forEach(x => { c += A[x % A.length]; }); return c; };
+$("frBody").addEventListener("click", async e => {
+  const b = e.target.closest("[data-fr]"); if (!b) return;
+  const a = b.dataset.fr;
+  if (a === "login") return openAcct();
+  if (a === "card") return shareCard();
+  if (a === "create" || a === "join") { frForm = a; renderFriends(); return; }
+  if (a === "cancel") { frForm = ""; renderFriends(); return; }
+  if (a === "invite") {
+    const c = myCh.find(x => x.id === b.dataset.c); if (!c) return;
+    const text = t("ch_invite", { n: c.name, c: c.code }) + " " + appUrl();
+    try { if (navigator.share) { await navigator.share({ title: "Pocket Coach", text }); return; } } catch (err) { return; }
+    try { await navigator.clipboard.writeText(text); } catch (err) {} toast(text); return;
+  }
+  if ((a === "docreate" || a === "dojoin") && !myName) { toast(t("need_name")); $("frName").focus(); return; }
+  chBusy = true; renderFriends();
+  try {
+    if (a === "docreate") {
+      const name = ($("chName") && $("chName").value.trim()) || t("fr_title"), days = Number($("chLen").value) || 7;
+      const { data: c, error } = await sb.from("challenges").insert({ code: newCode(), name, currency: mainCur, ends_at: new Date(Date.now() + days * DAY).toISOString(), created_by: user.id }).select().single();
+      if (error) throw error;
+      const { error: e2 } = await sb.from("challenge_members").insert({ challenge_id: c.id, user_id: user.id, display_name: myName });
+      if (e2) throw e2;
+    }
+    if (a === "dojoin") {
+      const code = ($("chCode").value || "").trim().toUpperCase(); if (!code) throw new Error(t("fr_code"));
+      const { error } = await sb.rpc("join_challenge", { p_code: code, p_name: myName });
+      if (error) throw error;
+    }
+    if (a === "leave") {
+      if (!confirm(t("ch_leave") + "?")) { chBusy = false; renderFriends(); return; }
+      const { error } = await sb.from("challenge_members").delete().eq("challenge_id", b.dataset.c).eq("user_id", user.id);
+      if (error) throw error;
+    }
+    frForm = ""; chBusy = false; await pushChallengeScores();
+  } catch (err) { toast(String(err.message || err).slice(0, 120)); }
+  chBusy = false; renderFriends();
+});
+
+// ===== SHARE CARD (an image of what you saved) =====
+async function shareCard() {
+  const W = 1080, H = 1350, c = document.createElement("canvas"); c.width = W; c.height = H;
+  const g = c.getContext("2d");
+  const bg = g.createLinearGradient(0, 0, W, H); bg.addColorStop(0, "#0b0d1c"); bg.addColorStop(1, "#3a1470"); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+  const glow = g.createRadialGradient(W * 0.85, 120, 10, W * 0.85, 120, 700); glow.addColorStop(0, "rgba(139,61,255,.55)"); glow.addColorStop(1, "rgba(139,61,255,0)"); g.fillStyle = glow; g.fillRect(0, 0, W, H);
+  const font = (w, px) => w + " " + px + 'px system-ui,-apple-system,"Segoe UI","Noto Sans TC","Noto Sans Thai",sans-serif';
+  const wrap = (text, x, y, max, lh) => { let line = ""; const parts = /\s/.test(text) ? text.split(/(\s+)/) : Array.from(text); parts.forEach(p => { if (g.measureText(line + p).width > max && line) { g.fillText(line.trim(), x, y); y += lh; line = p; } else line += p; }); g.fillText(line.trim(), x, y); return y + lh; };
+  g.fillStyle = "#eef0ff"; g.font = font(700, 56); g.fillText("Pocket Coach", 90, 150);
+  const total = Math.round(savedTotal(mainCur)), n = wishes.filter(w => w.status === "skipped").length;
+  g.font = font(800, 190); const big = g.createLinearGradient(90, 0, 900, 0); big.addColorStop(0, "#8fa0ff"); big.addColorStop(1, "#c79bff"); g.fillStyle = big; g.fillText(money(total, mainCur), 90, 560);
+  g.fillStyle = "#eef0ff"; g.font = font(600, 54); let y = wrap(t("card_saved"), 90, 660, 900, 70);
+  g.fillStyle = "#9ba2cc"; g.font = font(500, 44); y = wrap(t("card_skipped", { n }), 90, y + 20, 900, 60);
+  if (goal) { const pct = Math.min(100, Math.round(savedTotal(goal.cur) / goal.amount * 100)); y = wrap(t("card_goal", { g: goal.name, p: pct }), 90, y + 10, 900, 60);
+    g.fillStyle = "#283058"; g.fillRect(90, y, 900, 22); g.fillStyle = "#c79bff"; g.fillRect(90, y, 900 * pct / 100, 22); }
+  g.fillStyle = "#eef0ff"; g.font = font(700, 60); g.fillText(t("card_cta"), 90, H - 190);
+  g.fillStyle = "#9ba2cc"; g.font = font(500, 36); g.fillText(location.host || "pocket coach", 90, H - 120);
+  const blob = await new Promise(r => c.toBlob(r, "image/png"));
+  if (!blob) return;
+  const file = new File([blob], "pocket-coach-savings.png", { type: "image/png" });
+  try { if (navigator.canShare && navigator.canShare({ files: [file] })) { await navigator.share({ files: [file], title: "Pocket Coach" }); return; } } catch (e) { return; }
+  const a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = file.name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000);
+}
+$("btnCard").onclick = shareCard;
+
 // ===== TABS =====
 function showTab(name) {
   document.querySelectorAll(".view").forEach(v => v.classList.toggle("on", v.id === "view" + name));
@@ -885,7 +1125,7 @@ $("selMain").onchange = e => { mainCur = e.target.value; lsSet("pc_main", mainCu
 $("chkDemo").onchange = e => { demo = e.target.checked; lsSet("pc_demo", demo); renderAll(); };
 $("btnSettings").addEventListener("click", renderQR);
 $("chkSrc").onchange = e => { showSrc = e.target.checked; lsSet("pc_showsrc", showSrc); renderAll(); };
-$("btnClear").onclick = () => { if (!confirm(t("confirm_clear"))) return; exps = []; wallets = {}; wishes = []; goal = null; coach = null; pattern = null; saveExps(); saveWishes(); saveWallets(); ["pc_wallet", "pc_goal", "pc_coach", "pc_pattern"].forEach(k => lsSet(k, null)); $("sheetSet").classList.remove("open"); renderAll(); };
+$("btnClear").onclick = async () => { if (!confirm(t("confirm_clear"))) return; if (sb && user) { try { await sb.auth.signOut(); } catch (e) {} user = null; } dels = []; lsSet("pc_del", []); exps = []; wallets = {}; wishes = []; goal = null; coach = null; pattern = null; saveExps(); saveWishes(); saveWallets(); ["pc_wallet", "pc_goal", "pc_coach", "pc_pattern"].forEach(k => lsSet(k, null)); $("sheetSet").classList.remove("open"); renderAll(); };
 function applyTheme() {
   if (theme === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", theme);
   $("themeSw").innerHTML = Object.keys(THEMES).map(k => '<button data-th="' + k + '" class="' + (k === theme ? "on" : "") + '"><i style="background:' + THEMES[k] + '"></i>' + esc(t("th_" + k)) + "</button>").join("");
@@ -904,12 +1144,13 @@ function applyLang() {
   $("setWage").value = wage || "";
   if (ed) renderExp(); if (qd) renderQuick(); if (wd) renderWish();
 }
-function renderAll() { renderWallet(); renderStats(); renderExps(); renderWant(); renderInsights(); }
+function renderAll() { renderWallet(); renderStats(); renderExps(); renderWant(); renderInsights(); renderFriends(); renderAcct(); }
 
 // ===== START =====
 applyLang();
-showTab(["Spend", "Want", "Insight"].includes(lsGet("pc_tab", "Spend")) ? lsGet("pc_tab", "Spend") : "Spend");
+showTab(["Spend", "Want", "Insight", "Friends"].includes(lsGet("pc_tab", "Spend")) ? lsGet("pc_tab", "Spend") : "Spend");
 loadRates();
+initSync();
 try { if (sessionStorage.getItem("pc_justupdated")) { sessionStorage.removeItem("pc_justupdated"); toast(t("new_version") + " · " + t("version", { v: VERSION })); } } catch (e) {}
 if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
   let reloaded = false;
