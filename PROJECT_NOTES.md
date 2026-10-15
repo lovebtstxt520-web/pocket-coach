@@ -28,4 +28,4 @@ gemini-3.5-flash-lite (25s) -> gemini-3.8-flash (10s) -> claude-haiku-5-5 (last,
 2. Done (v2): want list, cool-off, saved total, hours of work, tabs, 8 themes (default Flow night).
 3. Done (v3): multi-currency wallets + live rates (/api/rates), regret check, savings goal, insights tab, weekly coach, buying pattern, demo mode, QR, pull down to update.
 4. Done (v4): email login + sync (Supabase, merge by id with tombstones, photos stay local), saving challenge with friends (code join via RPC, leaderboard shows only saved amount), share card image, black-purple icon.
-5. QR, brake guide, polish, demo, deck.
+5. v5: 9 languages (zh, zhs, en, th, ja, ko, es, fr, ar with RTL), record names translated by AI (mode translate, cached in rec.tr), brake guide, demo mode removed. Left: final testing, demo video, deck, write-up.
