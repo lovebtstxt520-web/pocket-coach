@@ -2,16 +2,17 @@
 // Variables and secrets (Cloudflare): GEMINI_API_KEY (secret), ANTHROPIC_API_KEY (secret, optional backup),
 // optional GEMINI_MODEL, GEMINI_FALLBACK_MODEL, CLAUDE_MODEL
 //
-// Request: { mode, lang: "en"|"zh"|"th", image?: base64 jpeg (no data: prefix), text?: string }
+// Request: { mode, lang: en|zh|zhs|th|ja|ko|es|fr|ar, image?: base64 jpeg (no data: prefix), text?: string }
 // modes and replies (every reply also has `by` = model that answered):
 //   receipt -> { readable, amount, currency, merchant, category, method, items:[{name,price}], note }
 //   quick   -> { entries:[{ item, amount, category, method, currency }] }  (optional currency = default)            (text note, may be voice-typed)
 //   wish    -> { item, price, currency, store, category, questions[3], tip }
 //   weekly  -> { headline, tips[] }                                        (text summary)
+//   translate -> { items:[{ id, text }] }                                   (text = JSON list of {id, text})
 //   regret  -> { headline, tips[] }                                        (text summary of past purchases)
 // Error: HTTP 502 { error: "model: reason | model: reason" }
 
-const LANG = { en: 'English', zh: 'Traditional Chinese', th: 'Thai' };
+const LANG = { en: 'English', zh: 'Traditional Chinese (Taiwan)', zhs: 'Simplified Chinese', th: 'Thai', ja: 'Japanese', ko: 'Korean', es: 'Spanish', fr: 'French', ar: 'Arabic' };
 const CATS = ['food', 'drink', 'groceries', 'transport', 'shopping', 'bills', 'health', 'fun', 'other'];
 const METHODS = ['cash', 'transfer', 'card'];
 
@@ -26,7 +27,7 @@ const SYSTEM = {
     'Never invent numbers you cannot see. Never output account numbers or reference numbers.'
   ].join(' '),
   quick: [
-    'You turn a short note of spending into separate entries. The note may be typed or voice-transcribed, in Thai, English or Chinese, and may contain several items, for example "chicken rice 50, taxi 80, thai tea 25" or "ข้าวมันไก่ 50 แท็กซี่ 80".',
+    'You turn a short note of spending into separate entries. The note may be typed or voice-transcribed, in any language, and may contain several items, for example "chicken rice 50, taxi 80, thai tea 25" or "ข้าวมันไก่ 50 แท็กซี่ 80".',
     'Answer ONLY with a JSON object: { "entries": [ { "item": short name, "amount": number, "category": one of ' + CATS.join(', ') + ', "method": one of cash, transfer, card (default cash; use transfer if the note says scan, QR, PromptPay or transfer; card if it says card), "currency": 3-letter code (use the default currency given below unless the note says another one, e.g. NT$ or 台幣 = TWD, 円 or yen = JPY, US$ = USD) } ] }.',
     'Skip anything without an amount. Do not invent amounts. Keep the order of the note.'
   ].join(' '),
@@ -44,6 +45,11 @@ const SYSTEM = {
   regret: [
     'You are a friendly money coach. You get a list of things the user bought after a cool-off period, each with its category, price and how they felt a week later (worth it, okay, regret).',
     'Answer ONLY with a JSON object: { "headline": one short sentence describing their pattern (which kinds of purchases they tend to regret or not), "tips": 2 short, kind, concrete suggestions }. Base it ONLY on the data. If there is too little data, say so kindly.'
+  ].join(' '),
+  translate: [
+    'You translate short names of spending records (things people bought or where they spent money) for a money tracking app.',
+    'You get a JSON list of { "id", "text" }. Answer ONLY with a JSON object: { "items": [ { "id": same id, "text": the translation } ] } with one entry for every input, in the same order.',
+    'Keep brand names written in Latin letters exactly as they are (for example 7-Eleven, Big C, Starbucks, Shopee, Deli, ZHANGLIANG). Translate every other word, including dish names and product names, for example 雞飯 → Chicken rice, 文件碎紙機 → Paper shredder, 张亮麻辣烫 → Zhangliang Malatang. Use the normal script of the target language. If a text is already in the target language, return it unchanged. Keep each one short.'
   ].join(' ')
 };
 
@@ -55,6 +61,8 @@ export async function onRequestPost({ request, env }) {
   const mode = SYSTEM[body.mode] ? body.mode : null;
   if (!mode) return reply(400, { error: 'Unknown mode.' });
   const lang = LANG[body.lang] ? body.lang : 'en';
+  // the answer language goes in the system prompt too, so it wins over English input text
+  const sys = SYSTEM[mode] + (mode === 'translate' ? '' : ' Always write your whole answer (every headline, tip, question, note and item name) in ' + LANG[lang] + '. The input may be in English or another language; still answer only in ' + LANG[lang] + '.');
 
   const parts = [];
   if (body.image) parts.push({ inline_data: { mime_type: 'image/jpeg', data: String(body.image) } });
@@ -62,7 +70,7 @@ export async function onRequestPost({ request, env }) {
   const defCur = cur(body.currency);
   if (mode === 'quick') parts.push({ text: 'Default currency: ' + defCur });
   if (!parts.length) return reply(400, { error: 'Nothing to read.' });
-  parts.push({ text: 'IMPORTANT: write every sentence, question, tip and item name in ' + LANG[lang] + ', even if the input is in another language. Keep shop and brand names as printed.' });
+  parts.push({ text: (mode === 'translate' ? 'Target language: ' + LANG[lang] + '.' : 'IMPORTANT: write every sentence, question, tip and item name in ' + LANG[lang] + ', even if the input is in another language. Keep shop and brand names as printed.') });
 
   // Order: two free Gemini models first, Claude (paid, separate servers) last.
   const queue = [];
@@ -89,7 +97,7 @@ export async function onRequestPost({ request, env }) {
         const res = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST', signal: AbortSignal.timeout(limit),
           headers: { 'Content-Type': 'application/json', 'x-api-key': cKey, 'anthropic-version': '2023-06-01' },
-          body: JSON.stringify({ model: q.m, max_tokens: 1200, system: SYSTEM[mode], messages: [{ role: 'user', content }] })
+          body: JSON.stringify({ model: q.m, max_tokens: 1200, system: sys, messages: [{ role: 'user', content }] })
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) { notes.push(q.m + ' (' + res.status + '): ' + msgOf(data)); continue; }
@@ -99,7 +107,7 @@ export async function onRequestPost({ request, env }) {
           method: 'POST', signal: AbortSignal.timeout(limit),
           headers: { 'Content-Type': 'application/json', 'x-goog-api-key': gKey },
           body: JSON.stringify({
-            systemInstruction: { parts: [{ text: SYSTEM[mode] }] },
+            systemInstruction: { parts: [{ text: sys }] },
             contents: [{ parts }],
             generationConfig: Object.assign({ responseMimeType: 'application/json', temperature: 0.2 }, lowThink ? { thinkingConfig: { thinkingLevel: 'low' } } : {})
           })
@@ -144,6 +152,9 @@ function clean(mode, o) {
   };
   if (mode === 'quick') return {
     entries: (Array.isArray(o.entries) ? o.entries : []).slice(0, 20).map((x) => ({ item: str(x && x.item, 60), amount: num(x && x.amount), category: cat(x && x.category), method: meth(x && x.method), currency: cur(x && x.currency) })).filter((x) => x.amount > 0)
+  };
+  if (mode === 'translate') return {
+    items: (Array.isArray(o.items) ? o.items : []).slice(0, 100).map((x) => ({ id: str(x && x.id, 40), text: str(x && x.text, 80) })).filter((x) => x.id && x.text)
   };
   if (mode === 'wish') return {
     item: str(o.item, 80), price: num(o.price), currency: cur(o.currency), store: str(o.store, 40), category: cat(o.category),
