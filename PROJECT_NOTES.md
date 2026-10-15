@@ -29,3 +29,10 @@ gemini-3.5-flash-lite (25s) -> gemini-3.8-flash (10s) -> claude-haiku-5-5 (last,
 3. Done (v3): multi-currency wallets + live rates (/api/rates), regret check, savings goal, insights tab, weekly coach, buying pattern, demo mode, QR, pull down to update.
 4. Done (v4): email login + sync (Supabase, merge by id with tombstones, photos stay local), saving challenge with friends (code join via RPC, leaderboard shows only saved amount), share card image, black-purple icon.
 5. v5: 9 languages (zh, zhs, en, th, ja, ko, es, fr, ar with RTL), record names translated by AI (mode translate, cached in rec.tr), brake guide, demo mode removed. Left: final testing, demo video, deck, write-up.
+
+## v6 (target users and business model)
+- First-time setup asks who you are: student (prices as days of pocket money), young worker (hours of work), foreigner in Thailand (second wallet in home currency). Stored in pc_profile, pc_allow. Coach prompt includes the profile.
+- Plus page (demo only, nothing charged or locked): free vs Plus table, 59 THB/month or 490 THB/year, ROI line from the user's own saved amount, AI use counter (pc_aiuse, 30 free per month shown).
+- "Move to savings" sheet: planned partner bank savings account (referral fee model).
+- Target users: A) Bangkok students and young workers 18-30, B) foreigners living in Thailand.
+- Competitors: MeowJot (KBTG, slip reading, 79/149 THB), Money Lover / Spendee / Wallet, Cleo (US AI coach), Buy or Bye / CutCut (cool-off only).
