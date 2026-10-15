@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f6f54">
+<title>Pocket Coach</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<style>
+:root{--bg:#f4efe4;--card:#fffdf8;--ink:#1f2a24;--mute:#6b736c;--line:#e4ddcd;--brand:#1f6f54;--brand-ink:#fff;--soft:#e3efe8;--warn:#b4532a;--warn-soft:#f8e6dc;--gold:#c58a1a;--gold-soft:#f7ecd2}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141815;--card:#1d231f;--ink:#e9ece7;--mute:#9aa39c;--line:#2e3631;--brand:#4fb58b;--brand-ink:#0f1612;--soft:#20352b;--warn:#f08b62;--warn-soft:#3a2219;--gold:#e5b34f;--gold-soft:#3a2f17}}
+:root[data-theme="dark"]{--bg:#141815;--card:#1d231f;--ink:#e9ece7;--mute:#9aa39c;--line:#2e3631;--brand:#4fb58b;--brand-ink:#0f1612;--soft:#20352b;--warn:#f08b62;--warn-soft:#3a2219;--gold:#e5b34f;--gold-soft:#3a2f17}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI","Noto Sans TC","Noto Sans Thai",sans-serif}
+button,input,select,textarea{font:inherit;color:inherit}
+.wrap{max-width:560px;margin:0 auto;padding:16px 16px 96px}
+header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding-top:6px}
+h1{margin:0;font-size:28px;letter-spacing:-.02em}
+.sub{margin:2px 0 0;color:var(--mute);font-size:14px}
+.ibtn{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;cursor:pointer;flex:none}
+.ibtn svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.wallet{margin:16px 0 10px;background:var(--brand);color:var(--brand-ink);border-radius:22px;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:12px}
+.wallet .k{font-size:13px;opacity:.85}
+.wallet .v{font-size:32px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1.15}
+.wallet .s{font-size:13px;opacity:.85;margin-top:2px}
+.wallet button{border:0;border-radius:12px;padding:9px 12px;background:rgba(255,255,255,.18);color:inherit;font-weight:600;cursor:pointer;white-space:nowrap}
+.wallet.low{background:var(--warn)}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 14px}
+.stat .k{font-size:12px;color:var(--mute)}
+.stat .v{font-size:22px;font-weight:700;margin-top:2px;font-variant-numeric:tabular-nums}
+.quick{display:flex;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:6px;margin-bottom:10px}
+.quick input{flex:1;min-width:0;border:0;background:transparent;padding:10px;outline:none}
+.qbtn{border:0;border-radius:12px;width:44px;flex:none;display:grid;place-items:center;cursor:pointer;background:var(--soft);color:var(--ink)}
+.qbtn.go{background:var(--brand);color:var(--brand-ink)}
+.qbtn.rec{background:var(--warn);color:#fff;animation:pulse 1s infinite}
+@keyframes pulse{50%{opacity:.6}}
+.qbtn svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.btn{border:0;border-radius:12px;padding:11px 14px;background:var(--brand);color:var(--brand-ink);font-weight:600;cursor:pointer;display:inline-flex;align-items:center;justify-content:center;gap:6px;position:relative;overflow:hidden;text-decoration:none}
+.btn.sec{background:var(--soft);color:var(--ink)}
+.btn.warn{background:var(--warn-soft);color:var(--warn)}
+.btn.gold{background:var(--gold);color:#fff}
+.btn.full{width:100%;margin-top:8px}
+.btn:disabled{opacity:.5}
+.btn input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.acts .btn{flex:1 1 120px}
+.day{font-size:12px;color:var(--mute);margin:14px 4px 6px}
+.row{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:8px;cursor:pointer}
+.dot{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:13px;font-weight:700;color:#fff;flex:none}
+.row .main{flex:1;min-width:0}
+.row .t{margin:0;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row .s{margin:0;font-size:13px;color:var(--mute)}
+.row .amt{font-weight:700;font-variant-numeric:tabular-nums;text-align:right}
+.tag{display:inline-block;font-size:11px;padding:1px 6px;border-radius:99px;background:var(--soft);margin-left:4px;vertical-align:1px}
+.tag.transfer{background:#dfe8f6;color:#2f5f9e}.tag.card{background:#eee3f3;color:#7a4a92}
+.src{margin:2px 0 0;font-size:11px;color:var(--mute);opacity:.8}
+.empty{text-align:center;color:var(--mute);padding:28px 12px}
+.empty b{display:block;color:var(--ink);font-size:17px;margin-bottom:4px}
+.muted{color:var(--mute);font-size:13px}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.4);display:none;align-items:flex-end;justify-content:center;z-index:20}
+.ov.open{display:flex}
+.sheet{background:var(--card);width:100%;max-width:560px;max-height:92vh;overflow:auto;border-radius:22px 22px 0 0;padding:18px 16px 28px}
+.hd{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.hd h3{margin:0;font-size:20px}
+.fld{margin-bottom:10px}
+.fld label,.lbl{display:block;font-size:12px;color:var(--mute);margin:0 0 3px}
+.fld input,.fld select{width:100%;padding:11px;border-radius:12px;border:1px solid var(--line);background:var(--bg);outline:none}
+.fld input:focus,.fld select:focus{border-color:var(--brand)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.prev{width:100%;max-height:240px;object-fit:contain;border-radius:14px;background:var(--soft);margin-bottom:10px}
+.spin{display:flex;align-items:center;gap:10px;padding:16px 4px;color:var(--mute)}
+.spin i{width:18px;height:18px;border:3px solid var(--soft);border-top-color:var(--brand);border-radius:50%;animation:r 1s linear infinite}
+@keyframes r{to{transform:rotate(360deg)}}
+.errbox{background:var(--warn-soft);color:var(--warn);border-radius:12px;padding:10px 12px;margin-bottom:8px;font-size:14px}
+.errdetail{margin-top:6px;font-size:11px;opacity:.65;word-break:break-word}
+.ai{background:var(--soft);border-radius:12px;padding:10px 12px;margin-bottom:10px;font-size:14px}
+.ai ul{margin:6px 0 0;padding-left:18px}
+.byline{margin-top:8px;font-size:12px;font-weight:600;color:var(--brand)}
+.seg{display:flex;gap:6px}
+.seg button{flex:1;border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:9px 4px;cursor:pointer;font-size:14px}
+.seg button.on{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+.qe{display:grid;grid-template-columns:auto 1fr 90px;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.qe input[type=checkbox]{width:20px;height:20px;accent-color:var(--brand)}
+.qe .nm{display:flex;flex-direction:column;gap:4px;min-width:0}
+.qe .nm input,.qe .nm select,.qe .am{width:100%;padding:8px;border-radius:10px;border:1px solid var(--line);background:var(--bg);outline:none}
+.qe .meta{display:flex;gap:6px}
+.qe .meta select{flex:1;font-size:13px;padding:6px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;opacity:0;transition:.25s;z-index:30;pointer-events:none;font-size:14px;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div><h1>Pocket Coach</h1><p class="sub" data-i18n="app_sub"></p></div>
+    <button class="ibtn" id="btnSettings" aria-label="settings"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  </header>
+
+  <div class="wallet" id="walletCard">
+    <div><div class="k" data-i18n="wallet_left"></div><div class="v" id="vWallet">-</div><div class="s" id="wSub"></div></div>
+    <button id="btnWallet" data-i18n="wallet_set"></button>
+  </div>
+  <div class="stats">
+    <div class="stat"><div class="k" data-i18n="today_spent"></div><div class="v" id="vToday">-</div></div>
+    <div class="stat"><div class="k" data-i18n="month_spent"></div><div class="v" id="vMonth">-</div></div>
+  </div>
+
+  <form class="quick" id="quickForm" autocomplete="off">
+    <input id="quickIn" enterkeyhint="send">
+    <button type="button" class="qbtn" id="btnMic" aria-label="voice" hidden><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+    <button type="submit" class="qbtn go" aria-label="add"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button>
+  </form>
+  <div class="acts">
+    <label class="btn"><span data-i18n="scan_receipt"></span><input type="file" accept="image/*" capture="environment" id="fCam"></label>
+    <label class="btn sec"><span data-i18n="from_gallery"></span><input type="file" accept="image/*" id="fGal"></label>
+    <button class="btn sec" id="btnManual" data-i18n="add_manual"></button>
+  </div>
+  <div id="expList"></div>
+</div>
+
+<div id="sheetExp" class="ov"><div class="sheet" id="expBody"></div></div>
+<div id="sheetQuick" class="ov"><div class="sheet" id="quickBody"></div></div>
+<div id="sheetWallet" class="ov"><div class="sheet">
+  <div class="hd"><h3 data-i18n="wallet_title"></h3><button class="btn sec" data-close="sheetWallet" data-i18n="cancel"></button></div>
+  <p class="muted" data-i18n="wallet_hint" style="margin-top:0"></p>
+  <div class="fld"><label data-i18n="wallet_now"></label><input id="inWallet" type="number" min="0" step="1" inputmode="decimal"></div>
+  <button class="btn full" id="btnWalletSave" data-i18n="save"></button>
+  <button class="btn sec full" id="btnWalletAdd" data-i18n="wallet_add"></button>
+</div></div>
+<div id="sheetSet" class="ov"><div class="sheet">
+  <div class="hd"><h3 data-i18n="settings"></h3><button class="btn sec" data-close="sheetSet" data-i18n="close"></button></div>
+  <div class="fld"><label data-i18n="language"></label><select id="selLang"></select></div>
+  <div class="fld"><label data-i18n="theme"></label><select id="selTheme"></select></div>
+  <label style="display:flex;gap:10px;align-items:center;padding:8px 2px"><input type="checkbox" id="chkSrc" style="width:20px;height:20px;accent-color:var(--brand)"> <span data-i18n="show_src"></span></label>
+  <p class="muted" style="text-align:center;margin:14px 0 0" id="verLbl"></p>
+  <button class="btn warn full" id="btnClear" style="margin-top:14px" data-i18n="clear_all"></button>
+</div></div>
+<div id="toast" class="toast"></div>
+
+<script>
+const VERSION = "1";
+// ===== TRANSLATIONS (every language must have exactly the same keys) =====
+const T = {
+en:{app_sub:"Your pocket money coach.",wallet_left:"Cash left in wallet",wallet_set:"Set wallet",wallet_unset:"Tap Set wallet to start",wallet_since:"Since {d} · spent {a}",wallet_title:"Cash in your wallet",wallet_hint:"Count the cash in your wallet now. Pocket subtracts every cash spending after this.",wallet_now:"I have this much cash now (THB)",wallet_add:"Add to wallet (ATM, top up)",wallet_added:"Added {a} to wallet",today_spent:"Spent today",month_spent:"Spent this month",
+quick_ph:"e.g. chicken rice 50, taxi 80",quick_title:"Check and save",quick_none:"I could not find any amounts. Try something like \"noodles 60\".",save_all:"Save {n}",scan_receipt:"Scan receipt",from_gallery:"Choose photo",add_manual:"Add by hand",
+empty_exp:"No spending yet",empty_exp_hint:"Type what you spent above, or snap a receipt or a transfer slip.",reading:"Reading...",new_exp:"New spending",edit_exp:"Edit spending",amount:"Amount",merchant:"Where / what",merchant_ph:"e.g. 7-Eleven",category:"Category",method:"Paid with",m_cash:"Cash",m_transfer:"QR / transfer",m_card:"Card",date:"Date",note:"Note",save:"Save",cancel:"Cancel",delete:"Delete",close:"Close",
+confirm_delete:"Delete this item?",retry:"Try again",ai_fail:"The AI is busy right now. Wait a few seconds and tap Try again. You can also fill it in yourself.",ai_items:"What the AI read",ai_check:"Please check the amount before saving.",unreadable:"I could not find a price in this photo. You can type it in.",
+c_food:"Food",c_drink:"Drinks",c_groceries:"Groceries",c_transport:"Transport",c_shopping:"Shopping",c_bills:"Bills",c_health:"Health",c_fun:"Fun",c_other:"Other",
+settings:"Settings",language:"Language",theme:"Theme",th_auto:"Auto",th_light:"Light",th_dark:"Dark",show_src:"Show which AI read each item",clear_all:"Delete all my data",confirm_clear:"Delete all data on this phone?",saved:"Saved",saved_n:"Saved {n} items",today:"Today",yesterday:"Yesterday",manual:"Entered by hand",version:"version {v}",mic_no:"Voice input is not available here. Use the microphone on your keyboard instead."},
+zh:{app_sub:"你的口袋理財教練。",wallet_left:"錢包還剩",wallet_set:"設定錢包",wallet_unset:"按「設定錢包」開始",wallet_since:"{d} 起 · 已花 {a}",wallet_title:"錢包裡的現金",wallet_hint:"數一下你錢包現在有多少現金。之後每一筆現金花費，Pocket 都會自動扣掉。",wallet_now:"我現在有多少現金（泰銖）",wallet_add:"加進錢包（領錢、補錢）",wallet_added:"錢包增加 {a}",today_spent:"今天花了",month_spent:"本月花了",
+quick_ph:"例如：雞飯 50、計程車 80",quick_title:"確認後儲存",quick_none:"找不到金額，試試「麵 60」這樣的寫法。",save_all:"儲存 {n} 筆",scan_receipt:"拍收據",from_gallery:"選照片",add_manual:"手動記一筆",
+empty_exp:"還沒有紀錄",empty_exp_hint:"在上面打字或用語音說你花了什麼，或拍收據、轉帳截圖。",reading:"讀取中...",new_exp:"新增支出",edit_exp:"修改支出",amount:"金額",merchant:"在哪裡／買什麼",merchant_ph:"例如：7-Eleven",category:"類別",method:"付款方式",m_cash:"現金",m_transfer:"掃碼／轉帳",m_card:"刷卡",date:"日期",note:"備註",save:"儲存",cancel:"取消",delete:"刪除",close:"關閉",
+confirm_delete:"要刪除這筆嗎？",retry:"再試一次",ai_fail:"AI 現在比較忙，請稍等幾秒再按一次。你也可以自己填好儲存。",ai_items:"AI 讀到的內容",ai_check:"儲存前請確認金額。",unreadable:"這張照片裡找不到價格，可以自己輸入。",
+c_food:"餐飲",c_drink:"飲料",c_groceries:"日用採買",c_transport:"交通",c_shopping:"購物",c_bills:"帳單",c_health:"醫療保健",c_fun:"娛樂",c_other:"其他",
+settings:"設定",language:"語言",theme:"主題",th_auto:"自動",th_light:"淺色",th_dark:"深色",show_src:"顯示每筆是哪個 AI 讀的",clear_all:"刪除我的所有資料",confirm_clear:"要刪除這支手機上的所有資料嗎？",saved:"已儲存",saved_n:"已儲存 {n} 筆",today:"今天",yesterday:"昨天",manual:"手動輸入",version:"版本 {v}",mic_no:"這裡不支援語音，可以改用鍵盤上的麥克風。"},
+th:{app_sub:"โค้ชการเงินในกระเป๋าของคุณ",wallet_left:"เงินสดเหลือในกระเป๋า",wallet_set:"ตั้งค่ากระเป๋า",wallet_unset:"แตะตั้งค่ากระเป๋าเพื่อเริ่ม",wallet_since:"ตั้งแต่ {d} · ใช้ไป {a}",wallet_title:"เงินสดในกระเป๋า",wallet_hint:"นับเงินสดในกระเป๋าตอนนี้ Pocket จะหักทุกรายจ่ายเงินสดหลังจากนี้",wallet_now:"ตอนนี้มีเงินสด (บาท)",wallet_add:"เพิ่มเงินเข้ากระเป๋า (กดเงิน เติมเงิน)",wallet_added:"เพิ่ม {a} เข้ากระเป๋า",today_spent:"วันนี้ใช้ไป",month_spent:"เดือนนี้ใช้ไป",
+quick_ph:"เช่น ข้าวมันไก่ 50 แท็กซี่ 80",quick_title:"ตรวจแล้วบันทึก",quick_none:"ไม่พบจำนวนเงิน ลองพิมพ์แบบ \"ก๋วยเตี๋ยว 60\"",save_all:"บันทึก {n} รายการ",scan_receipt:"ถ่ายใบเสร็จ",from_gallery:"เลือกรูป",add_manual:"จดเอง",
+empty_exp:"ยังไม่มีรายการ",empty_exp_hint:"พิมพ์หรือพูดสิ่งที่ใช้จ่ายด้านบน หรือถ่ายใบเสร็จ สลิปโอนเงิน",reading:"กำลังอ่าน...",new_exp:"เพิ่มรายจ่าย",edit_exp:"แก้ไขรายจ่าย",amount:"จำนวนเงิน",merchant:"ที่ไหน / ซื้ออะไร",merchant_ph:"เช่น 7-Eleven",category:"หมวด",method:"จ่ายด้วย",m_cash:"เงินสด",m_transfer:"สแกน / โอน",m_card:"บัตร",date:"วันที่",note:"หมายเหตุ",save:"บันทึก",cancel:"ยกเลิก",delete:"ลบ",close:"ปิด",
+confirm_delete:"ลบรายการนี้หรือไม่",retry:"ลองอีกครั้ง",ai_fail:"ตอนนี้ AI ยุ่งอยู่ รอสักครู่แล้วกดลองอีกครั้ง หรือกรอกเองได้",ai_items:"สิ่งที่ AI อ่านได้",ai_check:"ตรวจสอบจำนวนเงินก่อนบันทึก",unreadable:"ไม่พบราคาในรูปนี้ กรอกเองได้",
+c_food:"อาหาร",c_drink:"เครื่องดื่ม",c_groceries:"ของใช้",c_transport:"เดินทาง",c_shopping:"ช้อปปิ้ง",c_bills:"บิล",c_health:"สุขภาพ",c_fun:"บันเทิง",c_other:"อื่นๆ",
+settings:"การตั้งค่า",language:"ภาษา",theme:"ธีม",th_auto:"อัตโนมัติ",th_light:"สว่าง",th_dark:"มืด",show_src:"แสดงว่า AI ตัวไหนอ่านแต่ละรายการ",clear_all:"ลบข้อมูลทั้งหมดของฉัน",confirm_clear:"ลบข้อมูลทั้งหมดในเครื่องนี้หรือไม่",saved:"บันทึกแล้ว",saved_n:"บันทึก {n} รายการแล้ว",today:"วันนี้",yesterday:"เมื่อวาน",manual:"กรอกเอง",version:"เวอร์ชัน {v}",mic_no:"ใช้เสียงที่นี่ไม่ได้ ใช้ไมโครโฟนบนคีย์บอร์ดแทน"}
+};
+const LANGS = { zh:"繁體中文", en:"English", th:"ไทย" };
+const LOC = { en:"en-US", zh:"zh-TW", th:"th-TH-u-ca-gregory" };
+const SPEECH = { en:"en-US", zh:"zh-TW", th:"th-TH" };
+const CATS = ["food","drink","groceries","transport","shopping","bills","health","fun","other"];
+const METHODS = ["cash","transfer","card"];
+const CAT_COLOR = { food:"#d9822b", drink:"#8a5a44", groceries:"#3f8f5f", transport:"#2f6fb0", shopping:"#b0457a", bills:"#6b5bb8", health:"#c0453b", fun:"#d4a017", other:"#7a837c" };
+const DAY = 86400000;
+
+// ===== STATE =====
+const $ = id => document.getElementById(id);
+const lsGet = (k, d) => { try { const v = localStorage.getItem(k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { toast("Storage full"); return false; } };
+const navLang = (navigator.language || "").toLowerCase();
+let lang = lsGet("pc_lang", navLang.startsWith("th") ? "th" : navLang.startsWith("zh") ? "zh" : "en");
+let theme = lsGet("pc_theme", "auto");
+let showSrc = lsGet("pc_showsrc", false);
+let exps = lsGet("pc_exp", []);
+let wallet = lsGet("pc_wallet", null); // { base: amount counted, ts: when counted, adds: [{a, ts}] }
+const saveExps = () => lsSet("pc_exp", exps);
+
+function t(k, vars) {
+  let s = (T[lang] && T[lang][k]) || T.en[k] || k;
+  if (vars) Object.keys(vars).forEach(v => { s = s.split("{" + v + "}").join(vars[v]); });
+  return s;
+}
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+function money(a, cur) {
+  try { return new Intl.NumberFormat(LOC[lang], { style: "currency", currency: cur || "THB", currencyDisplay: "narrowSymbol", maximumFractionDigits: a % 1 ? 2 : 0 }).format(a || 0); }
+  catch (e) { return (cur || "THB") + " " + (a || 0); }
+}
+const startOfDay = ts => { const d = new Date(ts); d.setHours(0, 0, 0, 0); return d.getTime(); };
+const monthStart = () => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).getTime(); };
+const toDateInput = ts => { const d = new Date(ts); return d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0"); };
+const fromDateInput = (s, keep) => { const p = String(s).split("-").map(Number); if (p.length < 3 || !p[0]) return keep || Date.now(); const k = new Date(keep || Date.now()); return new Date(p[0], p[1] - 1, p[2], k.getHours(), k.getMinutes()).getTime(); };
+function dayLabel(ts) {
+  const d = startOfDay(ts), today = startOfDay(Date.now());
+  if (d === today) return t("today");
+  if (d === today - DAY) return t("yesterday");
+  return new Date(ts).toLocaleDateString(LOC[lang], { month: "short", day: "numeric", weekday: "short" });
+}
+function toast(msg) { const el = $("toast"); el.textContent = msg; el.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove("show"), 2400); }
+const catDot = c => '<span class="dot" style="background:' + CAT_COLOR[c] + '">' + esc(t("c_" + c).slice(0, lang === "en" ? 2 : 1)) + "</span>";
+const catOptions = sel => CATS.map(c => '<option value="' + c + '"' + (c === sel ? " selected" : "") + ">" + esc(t("c_" + c)) + "</option>").join("");
+const methodOptions = sel => METHODS.map(m => '<option value="' + m + '"' + (m === sel ? " selected" : "") + ">" + esc(t("m_" + m)) + "</option>").join("");
+const srcLine = by => showSrc ? '<p class="src">' + esc(by ? "AI: " + by : t("manual")) + "</p>" : "";
+const byLine = by => showSrc && by ? '<div class="byline">AI: ' + esc(by) + "</div>" : "";
+
+// ===== AI =====
+function processPhoto(file) {
+  return new Promise((resolve, reject) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const draw = (max, q) => {
+        const r = Math.min(1, max / Math.max(img.width, img.height));
+        const c = document.createElement("canvas");
+        c.width = Math.max(1, Math.round(img.width * r)); c.height = Math.max(1, Math.round(img.height * r));
+        c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+        return c.toDataURL("image/jpeg", q);
+      };
+      const out = { full: draw(1024, 0.82), thumb: draw(220, 0.6) };
+      URL.revokeObjectURL(url); resolve(out);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("image")); };
+    img.src = url;
+  });
+}
+async function callAI(payload) {
+  const res = await fetch("/api/ai", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(Object.assign({ lang }, payload)) });
+  const j = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(j.error || ("HTTP " + res.status));
+  return j;
+}
+const b64 = u => u.split(",")[1];
+const errHtml = (err, act) => '<div class="errbox">' + esc(t("ai_fail")) + '<div class="errdetail">' + esc(String(err).slice(0, 240)) + "</div></div>" +
+  (act ? '<button class="btn sec full" data-act="' + act + '" style="margin:0 0 10px">' + esc(t("retry")) + "</button>" : "");
+
+// ===== WALLET =====
+function walletLeft() {
+  if (!wallet) return null;
+  const added = (wallet.adds || []).reduce((s, x) => s + x.a, 0);
+  const spent = exps.filter(e => e.method === "cash" && e.currency === "THB" && e.ts >= wallet.ts).reduce((s, e) => s + e.amount, 0);
+  return { left: wallet.base + added - spent, spent };
+}
+function renderWallet() {
+  const w = walletLeft();
+  $("vWallet").textContent = w ? money(w.left, "THB") : "-";
+  $("wSub").textContent = w ? t("wallet_since", { d: new Date(wallet.ts).toLocaleDateString(LOC[lang], { month: "short", day: "numeric" }), a: money(w.spent, "THB") }) : t("wallet_unset");
+  $("walletCard").classList.toggle("low", !!w && w.left < 0);
+}
+$("btnWallet").onclick = () => { const w = walletLeft(); $("inWallet").value = w ? Math.max(0, Math.round(w.left)) : ""; $("sheetWallet").classList.add("open"); setTimeout(() => $("inWallet").focus(), 50); };
+$("btnWalletSave").onclick = () => {
+  const v = Number($("inWallet").value);
+  if (!(v >= 0) || $("inWallet").value === "") { $("inWallet").focus(); return; }
+  wallet = { base: Math.round(v * 100) / 100, ts: Date.now(), adds: [] }; lsSet("pc_wallet", wallet);
+  $("sheetWallet").classList.remove("open"); renderAll(); toast(t("saved"));
+};
+$("btnWalletAdd").onclick = () => {
+  const v = Number($("inWallet").value);
+  if (!(v > 0)) { $("inWallet").focus(); return; }
+  if (!wallet) wallet = { base: 0, ts: Date.now(), adds: [] };
+  wallet.adds = (wallet.adds || []).concat([{ a: Math.round(v * 100) / 100, ts: Date.now() }]); lsSet("pc_wallet", wallet);
+  $("sheetWallet").classList.remove("open"); renderAll(); toast(t("wallet_added", { a: money(v, "THB") }));
+};
+
+// ===== TOTALS AND LIST =====
+function renderStats() {
+  const ms = monthStart(), ds = startOfDay(Date.now());
+  const thb = exps.filter(e => e.currency === "THB");
+  $("vToday").textContent = money(thb.filter(e => e.ts >= ds).reduce((s, e) => s + e.amount, 0), "THB");
+  $("vMonth").textContent = money(thb.filter(e => e.ts >= ms).reduce((s, e) => s + e.amount, 0), "THB");
+}
+function renderExps() {
+  const box = $("expList");
+  if (!exps.length) { box.innerHTML = '<div class="empty"><b>' + esc(t("empty_exp")) + "</b>" + esc(t("empty_exp_hint")) + "</div>"; return; }
+  let html = "", last = null;
+  exps.slice().sort((a, b) => b.ts - a.ts).slice(0, 300).forEach(e => {
+    const d = startOfDay(e.ts);
+    if (d !== last) { html += '<p class="day">' + esc(dayLabel(e.ts)) + "</p>"; last = d; }
+    html += '<div class="row" data-id="' + esc(e.id) + '">' + catDot(e.category) +
+      '<div class="main"><p class="t">' + esc(e.merchant || t("c_" + e.category)) + '</p><p class="s">' + esc(t("c_" + e.category)) +
+      (e.method !== "cash" ? '<span class="tag ' + esc(e.method) + '">' + esc(t("m_" + e.method)) + "</span>" : "") + (e.note ? " · " + esc(e.note) : "") + "</p>" + srcLine(e.by) + "</div>" +
+      '<div class="amt">' + esc(money(e.amount, e.currency)) + "</div></div>";
+  });
+  box.innerHTML = html;
+}
+$("expList").addEventListener("click", ev => { const r = ev.target.closest(".row"); if (r) openExp({ editId: r.dataset.id }); });
+
+// ===== QUICK ADD (type or speak) =====
+let qd = null;
+$("quickForm").addEventListener("submit", e => { e.preventDefault(); const v = $("quickIn").value.trim(); if (v) quickParse(v); });
+async function quickParse(text) {
+  qd = { text, step: "loading", entries: [], err: "", by: "" };
+  $("sheetQuick").classList.add("open"); renderQuick();
+  const mine = qd;
+  try {
+    const r = await callAI({ mode: "quick", text });
+    if (qd !== mine) return;
+    qd.entries = (r.entries || []).map(x => Object.assign({ on: true }, x)); qd.by = r.by || "";
+  } catch (e) { if (qd !== mine) return; qd.err = String(e.message || e); }
+  qd.step = "form"; renderQuick();
+}
+function renderQuick() {
+  const d = qd; if (!d) return;
+  let h = '<div class="hd"><h3>' + esc(t("quick_title")) + '</h3><button class="btn sec" data-act="close">' + esc(t("cancel")) + "</button></div>" +
+    '<p class="muted" style="margin-top:0">“' + esc(d.text) + "”</p>";
+  if (d.step === "loading") { $("quickBody").innerHTML = h + '<div class="spin"><i></i>' + esc(t("reading")) + "</div>"; return; }
+  if (d.err) h += errHtml(d.err, "retry");
+  else if (!d.entries.length) h += '<div class="errbox">' + esc(t("quick_none")) + "</div>";
+  d.entries.forEach((x, i) => {
+    h += '<div class="qe" data-i="' + i + '"><input type="checkbox" data-f="on"' + (x.on ? " checked" : "") + '>' +
+      '<div class="nm"><input data-f="item" value="' + esc(x.item) + '"><div class="meta"><select data-f="category">' + catOptions(x.category) + '</select><select data-f="method">' + methodOptions(x.method) + "</select></div></div>" +
+      '<input class="am" data-f="amount" type="number" min="0" step="0.01" inputmode="decimal" value="' + esc(x.amount) + '"></div>';
+  });
+  const n = d.entries.filter(x => x.on && Number(x.amount) > 0).length;
+  if (d.entries.length) h += byLine(d.by) + '<button class="btn full" data-act="saveall"' + (n ? "" : " disabled") + ">" + esc(t("save_all", { n })) + "</button>";
+  $("quickBody").innerHTML = h;
+}
+$("quickBody").addEventListener("input", e => {
+  const row = e.target.closest(".qe"); if (!row || !qd) return;
+  const x = qd.entries[Number(row.dataset.i)], f = e.target.dataset.f;
+  if (f === "on") x.on = e.target.checked; else x[f] = e.target.value;
+  const n = qd.entries.filter(y => y.on && Number(y.amount) > 0).length, b = $("quickBody").querySelector('[data-act="saveall"]');
+  if (b) { b.disabled = !n; b.textContent = t("save_all", { n }); }
+});
+$("quickBody").addEventListener("change", e => { if (e.target.tagName === "SELECT" || e.target.type === "checkbox") e.target.dispatchEvent(new Event("input", { bubbles: true })); });
+$("quickBody").addEventListener("click", e => {
+  const b = e.target.closest("[data-act]"); if (!b || !qd) return;
+  if (b.dataset.act === "close") { closeQuick(); return; }
+  if (b.dataset.act === "retry") { quickParse(qd.text); return; }
+  if (b.dataset.act === "saveall") {
+    const now = Date.now();
+    const add = qd.entries.filter(x => x.on && Number(x.amount) > 0).map((x, i) => ({ id: uid(), ts: now + i, amount: Math.round(Number(x.amount) * 100) / 100, currency: "THB", merchant: String(x.item || "").trim(), category: CATS.includes(x.category) ? x.category : "other", method: METHODS.includes(x.method) ? x.method : "cash", note: "", items: [], thumb: "", by: qd.by }));
+    exps = exps.concat(add); saveExps(); $("quickIn").value = ""; closeQuick(); renderAll(); toast(t("saved_n", { n: add.length }));
+  }
+});
+function closeQuick() { $("sheetQuick").classList.remove("open"); qd = null; }
+
+// voice input (Chrome on Android supports this; otherwise the keyboard microphone still works)
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = null;
+if (SR) $("btnMic").hidden = false;
+$("btnMic").onclick = () => {
+  if (!SR) { toast(t("mic_no")); return; }
+  if (rec) { rec.stop(); return; }
+  rec = new SR(); rec.lang = SPEECH[lang]; rec.interimResults = true; rec.maxAlternatives = 1;
+  const base = $("quickIn").value ? $("quickIn").value + " " : "";
+  rec.onresult = ev => { let s = ""; for (let i = 0; i < ev.results.length; i++) s += ev.results[i][0].transcript; $("quickIn").value = base + s; };
+  rec.onerror = () => toast(t("mic_no"));
+  rec.onend = () => { $("btnMic").classList.remove("rec"); rec = null; const v = $("quickIn").value.trim(); if (v && v !== base.trim()) quickParse(v); };
+  $("btnMic").classList.add("rec"); try { rec.start(); } catch (e) { rec = null; $("btnMic").classList.remove("rec"); toast(t("mic_no")); }
+};
+
+// ===== RECEIPT / MANUAL / EDIT =====
+let ed = null;
+function openExp(opts) {
+  opts = opts || {};
+  if (opts.editId) {
+    const e = exps.find(x => x.id === opts.editId); if (!e) return;
+    ed = { editId: e.id, amount: e.amount, currency: e.currency, merchant: e.merchant, category: e.category, method: e.method || "cash", ts: e.ts, note: e.note || "", thumb: e.thumb || "", full: "", items: e.items || [], aiNote: "", err: "", by: e.by || "", step: "form" };
+  } else ed = { amount: "", currency: "THB", merchant: "", category: "food", method: "cash", ts: Date.now(), note: "", thumb: "", full: "", items: [], aiNote: "", err: "", by: "", step: "form" };
+  $("sheetExp").classList.add("open"); renderExp();
+}
+function closeExp() { $("sheetExp").classList.remove("open"); ed = null; }
+async function expFromPhoto(file) {
+  openExp();
+  try { const p = await processPhoto(file); ed.thumb = p.thumb; ed.full = p.full; } catch (e) { ed.err = "Could not open this photo."; renderExp(); return; }
+  scanReceipt();
+}
+async function scanReceipt() {
+  if (!ed || !ed.full) return;
+  ed.step = "loading"; ed.err = ""; renderExp();
+  const mine = ed;
+  try {
+    const r = await callAI({ mode: "receipt", image: b64(mine.full) });
+    if (ed !== mine) return;
+    ed.items = r.items || []; ed.aiNote = r.readable ? (r.note || "") : t("unreadable");
+    if (r.readable) { ed.amount = r.amount; ed.currency = r.currency || "THB"; }
+    if (r.merchant) ed.merchant = r.merchant;
+    ed.category = r.category || ed.category; ed.method = r.method || ed.method; ed.scanned = true; ed.by = r.by || "";
+  } catch (e) { if (ed !== mine) return; ed.err = String(e.message || e); }
+  ed.step = "form"; renderExp();
+}
+function renderExp() {
+  const d = ed; if (!d) return;
+  let h = '<div class="hd"><h3>' + esc(t(d.editId ? "edit_exp" : "new_exp")) + '</h3><button class="btn sec" data-act="close">' + esc(t("cancel")) + "</button></div>";
+  if (d.full || d.thumb) h += '<img class="prev" alt="" src="' + esc(d.full || d.thumb) + '">';
+  if (d.step === "loading") { $("expBody").innerHTML = h + '<div class="spin"><i></i>' + esc(t("reading")) + "</div>"; return; }
+  if (d.err) h += errHtml(d.err, d.full ? "rescan" : "");
+  if (d.scanned) h += '<div class="ai"><b>' + esc(t("ai_items")) + "</b>" + (d.items.length ? "<ul>" + d.items.map(x => "<li>" + esc(x.name) + (x.price ? " · " + esc(money(x.price, d.currency)) : "") + "</li>").join("") + "</ul>" : "") + '<div style="margin-top:6px">' + esc(d.aiNote || t("ai_check")) + "</div>" + byLine(d.by) + "</div>";
+  else if (d.editId && showSrc) h += '<p class="src" style="margin:0 0 10px">' + esc(d.by ? "AI: " + d.by : t("manual")) + "</p>";
+  h += '<div class="two"><div class="fld"><label>' + esc(t("amount")) + " (" + esc(d.currency) + ')</label><input id="eAmt" type="number" min="0" step="0.01" inputmode="decimal" value="' + esc(d.amount) + '"></div>' +
+    '<div class="fld"><label>' + esc(t("category")) + '</label><select id="eCat">' + catOptions(d.category) + "</select></div></div>" +
+    '<div class="fld"><label>' + esc(t("merchant")) + '</label><input id="eMer" maxlength="60" placeholder="' + esc(t("merchant_ph")) + '" value="' + esc(d.merchant) + '"></div>' +
+    '<p class="lbl">' + esc(t("method")) + '</p><div class="seg" style="margin-bottom:10px">' + METHODS.map(m => '<button data-m="' + m + '" class="' + (d.method === m ? "on" : "") + '">' + esc(t("m_" + m)) + "</button>").join("") + "</div>" +
+    '<div class="two"><div class="fld"><label>' + esc(t("date")) + '</label><input id="eDate" type="date" value="' + esc(toDateInput(d.ts)) + '"></div>' +
+    '<div class="fld"><label>' + esc(t("note")) + '</label><input id="eNote" maxlength="80" value="' + esc(d.note) + '"></div></div>' +
+    '<button class="btn full" data-act="save">' + esc(t("save")) + "</button>" + (d.editId ? '<button class="btn warn full" data-act="del">' + esc(t("delete")) + "</button>" : "");
+  $("expBody").innerHTML = h;
+}
+$("expBody").addEventListener("input", e => {
+  if (!ed) return; const id = e.target.id, v = e.target.value;
+  if (id === "eAmt") ed.amount = v; if (id === "eCat") ed.category = v; if (id === "eMer") ed.merchant = v;
+  if (id === "eDate") ed.ts = fromDateInput(v, ed.ts); if (id === "eNote") ed.note = v;
+});
+$("expBody").addEventListener("click", e => {
+  if (!ed) return;
+  const mb = e.target.closest("[data-m]"); if (mb) { ed.method = mb.dataset.m; renderExp(); return; }
+  const b = e.target.closest("[data-act]"); if (!b) return;
+  const a = b.dataset.act;
+  if (a === "close") closeExp();
+  if (a === "rescan") scanReceipt();
+  if (a === "save") saveExp();
+  if (a === "del" && confirm(t("confirm_delete"))) { exps = exps.filter(x => x.id !== ed.editId); saveExps(); closeExp(); renderAll(); }
+});
+function saveExp() {
+  const amt = Math.round(Number(ed.amount) * 100) / 100;
+  if (!(amt > 0)) { $("eAmt") && $("eAmt").focus(); return; }
+  const rec = { id: ed.editId || uid(), ts: ed.ts, amount: amt, currency: ed.currency || "THB", merchant: String(ed.merchant || "").trim(), category: CATS.includes(ed.category) ? ed.category : "other", method: METHODS.includes(ed.method) ? ed.method : "cash", note: String(ed.note || "").trim(), items: ed.items || [], thumb: ed.thumb || "", by: ed.by || "" };
+  if (ed.editId) exps = exps.map(x => x.id === ed.editId ? rec : x); else exps.push(rec);
+  if (!saveExps()) { rec.thumb = ""; saveExps(); }
+  closeExp(); renderAll(); toast(t("saved"));
+}
+function onFile(input, fn) { input.addEventListener("change", e => { const f = e.target.files && e.target.files[0]; e.target.value = ""; if (f) fn(f); }); }
+onFile($("fCam"), expFromPhoto); onFile($("fGal"), expFromPhoto);
+$("btnManual").onclick = () => openExp();
+
+// ===== SETTINGS =====
+$("btnSettings").onclick = () => $("sheetSet").classList.add("open");
+document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click", () => $(b.dataset.close).classList.remove("open")));
+document.querySelectorAll(".ov").forEach(o => o.addEventListener("click", e => { if (e.target === o) { o.classList.remove("open"); if (o.id === "sheetExp") ed = null; if (o.id === "sheetQuick") qd = null; } }));
+$("selLang").onchange = e => { lang = e.target.value; lsSet("pc_lang", lang); applyLang(); };
+$("selTheme").onchange = e => { theme = e.target.value; lsSet("pc_theme", theme); applyTheme(); };
+$("chkSrc").onchange = e => { showSrc = e.target.checked; lsSet("pc_showsrc", showSrc); renderAll(); };
+$("btnClear").onclick = () => { if (!confirm(t("confirm_clear"))) return; exps = []; wallet = null; saveExps(); lsSet("pc_wallet", null); $("sheetSet").classList.remove("open"); renderAll(); };
+function applyTheme() {
+  if (theme === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", theme);
+  $("selTheme").innerHTML = ["auto", "light", "dark"].map(k => '<option value="' + k + '"' + (k === theme ? " selected" : "") + ">" + esc(t("th_" + k)) + "</option>").join("");
+}
+function applyLang() {
+  document.documentElement.lang = lang === "zh" ? "zh-Hant" : lang;
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+  $("quickIn").placeholder = t("quick_ph");
+  $("selLang").innerHTML = Object.keys(LANGS).map(k => '<option value="' + k + '"' + (k === lang ? " selected" : "") + ">" + LANGS[k] + "</option>").join("");
+  $("verLbl").textContent = t("version", { v: VERSION });
+  $("chkSrc").checked = showSrc;
+  applyTheme(); renderAll();
+  if (ed) renderExp(); if (qd) renderQuick();
+}
+function renderAll() { renderWallet(); renderStats(); renderExps(); }
+
+// ===== START =====
+applyLang();
+if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
+</script>
+</body>
+</html>
