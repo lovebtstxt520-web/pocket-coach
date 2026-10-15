@@ -13,3 +13,4 @@ drop policy if exists "anyone can send ideas" on public.feedback;
 create policy "anyone can send ideas" on public.feedback for insert to anon, authenticated
   with check (char_length(message) between 3 and 1000 and (user_id is null or user_id = auth.uid()));
 grant insert on public.feedback to anon, authenticated;
+

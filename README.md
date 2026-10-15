@@ -4,7 +4,7 @@
 
 Pocket Coach is an AI money coach for young people in Thailand. It logs the spending that banking apps miss (cash at markets, street food, buses), and it puts a brake on impulse online shopping before you tap Buy.
 
-- **Live demo:** https://pocket-coach-bnl.pages.dev (tap "Look around with sample data" on the first screen to see every feature at once)
+- **Live demo:** https://pocket-coach-bnl.pages.dev (tap "See how it works" on the first screen for a guided tour with sample data)
 - **Track:** U-Hackathon 2026, Track 1 (AI)
 - **Builder:** Rita, solo. Written from scratch during the event, 15 to 16 October 2026.
 
@@ -48,7 +48,8 @@ The first screen asks which one you are and sets the app up for you: students se
 - 9 languages: Traditional Chinese, Simplified Chinese, English, Thai, Japanese, Korean, Spanish, French and Arabic (right-to-left).
 - Your records follow the language: type "雞飯" and switch to English to see "Chicken rice". The original text is always kept.
 - 8 themes, installable on the home screen, pull down to update, QR code to open on a phone.
-- Optional account to back up and sync between devices.
+- Optional account to back up and sync between devices, with change password, reset password by email and delete account.
+- A guided tour of every tab (Settings > How to use Pocket Coach), with sample data you can keep or remove.
 
 ## How AI is used
 
@@ -93,9 +94,9 @@ Phone browser (PWA, one HTML file, plain JavaScript)
 
 ## Business model
 
-- **Free:** cash wallet, spending log, want list and cool-off, 30 AI reads a month.
-- **Plus (59 THB a month or 490 THB a year):** unlimited AI, weekly coach, buying pattern, sync, challenges, records in 9 languages, and more accounts (bank, e-wallet, card, envelopes; coming soon).
-- **Partner banks:** move the money you saved into a partner savings account in one tap; the bank pays a referral fee. Planned.
+- **Free:** cash wallets, spending log, want list and cool-off, weekly coach, sync, saving challenges and all 9 languages. 30 AI reads and 5 "Ask your coach" questions a month.
+- **Plus (59 THB a month or 490 THB a year):** unlimited AI reads, unlimited "Ask your coach", the buying pattern found from your regrets, and more accounts (bank, e-wallet, card, envelopes; coming soon).
+- The Plus page shows each user how many months of Plus their own savings have already paid for.
 
 The Plus page in the demo shows pricing only. Nothing is charged and nothing is locked during the hackathon.
 

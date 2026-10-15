@@ -38,3 +38,13 @@ gemini-3.5-flash-lite (25s) -> gemini-3.8-flash (10s) -> claude-haiku-5-5 (last,
 - v7: Ask your coach (mode ask) on Insights: user asks about their own money; context = weekText + month totals + wallets + cool-off items + last 25 records.
 - v7.1: sample data (demo: true on every record; load from first screen or Settings, remove in Settings). README.md for judges.
 - Competitors: MeowJot (KBTG, slip reading, 79/149 THB), Money Lover / Spendee / Wallet, Cleo (US AI coach), Buy or Bye / CutCut (cool-off only).
+
+## v8 (21:30 to midnight, Thursday)
+- Wallets: card shows one equal-size row per currency; sheet has Add / Take out / Set balance / Remove. Removing keeps { removed: true, ts } so sync cannot bring it back.
+- Guided tour of every tab and Settings (9 steps), replay from Settings > How to use. Sample data is loaded if the app is empty; at the end the user keeps or removes it.
+- Account: change password (checks the current one), forgot password by email (resetPasswordForEmail, PASSWORD_RECOVERY event), delete account (RPC delete_my_account in supabase_setup.sql section 4). Not signed in: "Delete all my data" wipes this phone.
+- Ask your coach: newest answer only, older ones behind a History button (keeps 20).
+- Plus table lists only what Plus adds: AI reads, coach questions (free 5/month), buying pattern, more accounts. Partner bank savings removed.
+- Price comparison: hours, days of pocket money, custom item ("bubble tea 60 -> ≈ bubble tea × 22"), or off.
+- Voice: language picker next to the mic (9 languages), hint under the input.
+- Removed "Change my profile" (profile only sets defaults; everything is changeable in Settings).
