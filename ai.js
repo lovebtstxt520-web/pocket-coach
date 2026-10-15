@@ -49,7 +49,7 @@ const SYSTEM = {
   translate: [
     'You translate short names of spending records (things people bought or where they spent money) for a money tracking app.',
     'You get a JSON list of { "id", "text" }. Answer ONLY with a JSON object: { "items": [ { "id": same id, "text": the translation } ] } with one entry for every input, in the same order.',
-    'Keep brand and shop names as they are (for example 7-Eleven, Big C, Starbucks, Shopee); translate only the ordinary words. If a text is already in the target language, return it unchanged. Keep each one short.'
+    'Keep brand names written in Latin letters exactly as they are (for example 7-Eleven, Big C, Starbucks, Shopee, Deli, ZHANGLIANG). Translate every other word, including dish names and product names, for example 雞飯 → Chicken rice, 文件碎紙機 → Paper shredder, 张亮麻辣烫 → Zhangliang Malatang. Use the normal script of the target language. If a text is already in the target language, return it unchanged. Keep each one short.'
   ].join(' ')
 };
 
@@ -61,6 +61,8 @@ export async function onRequestPost({ request, env }) {
   const mode = SYSTEM[body.mode] ? body.mode : null;
   if (!mode) return reply(400, { error: 'Unknown mode.' });
   const lang = LANG[body.lang] ? body.lang : 'en';
+  // the answer language goes in the system prompt too, so it wins over English input text
+  const sys = SYSTEM[mode] + (mode === 'translate' ? '' : ' Always write your whole answer (every headline, tip, question, note and item name) in ' + LANG[lang] + '. The input may be in English or another language; still answer only in ' + LANG[lang] + '.');
 
   const parts = [];
   if (body.image) parts.push({ inline_data: { mime_type: 'image/jpeg', data: String(body.image) } });
@@ -95,7 +97,7 @@ export async function onRequestPost({ request, env }) {
         const res = await fetch('https://api.anthropic.com/v1/messages', {
           method: 'POST', signal: AbortSignal.timeout(limit),
           headers: { 'Content-Type': 'application/json', 'x-api-key': cKey, 'anthropic-version': '2023-06-01' },
-          body: JSON.stringify({ model: q.m, max_tokens: 1200, system: SYSTEM[mode], messages: [{ role: 'user', content }] })
+          body: JSON.stringify({ model: q.m, max_tokens: 1200, system: sys, messages: [{ role: 'user', content }] })
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) { notes.push(q.m + ' (' + res.status + '): ' + msgOf(data)); continue; }
@@ -105,7 +107,7 @@ export async function onRequestPost({ request, env }) {
           method: 'POST', signal: AbortSignal.timeout(limit),
           headers: { 'Content-Type': 'application/json', 'x-goog-api-key': gKey },
           body: JSON.stringify({
-            systemInstruction: { parts: [{ text: SYSTEM[mode] }] },
+            systemInstruction: { parts: [{ text: sys }] },
             contents: [{ parts }],
             generationConfig: Object.assign({ responseMimeType: 'application/json', temperature: 0.2 }, lowThink ? { thinkingConfig: { thinkingLevel: 'low' } } : {})
           })

@@ -269,7 +269,7 @@ h1{margin:0;font-size:28px;letter-spacing:-.02em}
 <script src="qrcode.js"></script>
 
 <script>
-const VERSION = "5";
+const VERSION = "5.1";
 // ===== TRANSLATIONS (every language must have exactly the same keys) =====
 const T = {
 en:{app_sub:"Your pocket money coach.",wallet_left:"Cash left in wallet",wallet_set:"Set wallet",wallet_unset:"Tap Set wallet to start",wallet_since:"Since {d} · spent {a}",wallet_title:"Cash in your wallet",wallet_hint:"Count the cash in your wallet now. Pocket subtracts every cash spending after this.",wallet_now:"I have this much cash now",wallet_add:"Add to wallet (ATM, top up)",wallet_added:"Added {a} to wallet",today_spent:"Spent today",month_spent:"Spent this month",
@@ -824,6 +824,7 @@ function renderInsights() {
   box.innerHTML = h;
 }
 function coachCard(mode, title, btn, data, ok, need) {
+  if (data && data.lang && data.lang !== lang) data = null;
   let h = '<div class="card"><h4>' + esc(t(title)) + "</h4>";
   if (data) h += '<div class="ai" style="margin-bottom:8px"><b>' + esc(data.headline) + '</b><ul>' + (data.tips || []).map(x => "<li>" + esc(x) + "</li>").join("") + "</ul>" + byLine(data.by) + '<div class="muted" style="margin-top:6px;font-size:11px">' + esc(t("updated_on", { d: new Date(data.ts).toLocaleString(LOC[lang], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) })) + "</div></div>";
   if (coachBusy === mode) h += '<div class="spin"><i></i>' + esc(t("reading")) + "</div>";
@@ -857,7 +858,7 @@ $("insBody").addEventListener("click", async e => {
   const mode = b.dataset.coach; coachBusy = mode; coachErr[mode] = ""; renderInsights();
   try {
     const r = await callAI({ mode, text: mode === "weekly" ? weekText() : regretText() });
-    const out = { headline: r.headline, tips: r.tips || [], by: r.by || "", ts: Date.now() };
+    const out = { headline: r.headline, tips: r.tips || [], by: r.by || "", ts: Date.now(), lang };
     if (mode === "weekly") { coach = out; lsSet("pc_coach", coach); } else { pattern = out; lsSet("pc_pattern", pattern); }
   } catch (err) { coachErr[mode] = String(err.message || err); }
   coachBusy = ""; renderInsights();
@@ -904,26 +905,27 @@ let trBusy = false;
 async function translateNames() {
   if (trBusy) return;
   const need = [];
-  exps.forEach(e => { if (e.merchant && e.lang !== lang && !(e.tr && e.tr.src === e.merchant && e.tr[lang])) need.push({ rec: e, field: "merchant" }); });
-  wishes.forEach(w => { if (w.item && w.lang !== lang && !(w.tr && w.tr.src === w.item && w.tr[lang])) need.push({ rec: w, field: "item" }); });
+  exps.forEach(e => { if (e.merchant && e.lang !== lang && !(e.tr && e.tr.src === e.merchant && e.tr[lang])) need.push({ rec: e, field: "merchant", text: e.merchant }); });
+  wishes.forEach(w => { if (w.item && w.lang !== lang && !(w.tr && w.tr.src === w.item && w.tr[lang])) need.push({ rec: w, field: "item", text: w.item }); });
   if (!need.length) return;
   trBusy = true;
   const want = lang;
   try {
     for (let i = 0; i < need.length && i < 120; i += 40) {
       const batch = need.slice(i, i + 40);
-      const r = await callAI({ mode: "translate", text: JSON.stringify(batch.map((x, k) => ({ id: String(k), text: x.rec[x.field] }))) });
+      const r = await callAI({ mode: "translate", text: JSON.stringify(batch.map((x, k) => ({ id: String(k), text: x.text }))) });
       if (lang !== want) break;
       (r.items || []).forEach(it => {
         const x = batch[Number(it.id)]; if (!x) return;
-        const src = x.rec[x.field];
-        if (!x.rec.tr || x.rec.tr.src !== src) x.rec.tr = { src };
-        x.rec.tr[want] = it.text;
+        const list = x.field === "merchant" ? exps : wishes, rec = list.find(y => y.id === x.rec.id) || x.rec;
+        const src = rec[x.field]; if (src !== x.text) return;
+        if (!rec.tr || rec.tr.src !== src) rec.tr = { src };
+        rec.tr[want] = it.text;
       });
       rawSet("pc_exp", exps); rawSet("pc_wish", wishes);
       renderAll(); if (wd) renderWish();
     }
-  } catch (e) {}
+  } catch (e) { setTimeout(translateNames, 15000); }
   trBusy = false;
 }
 
