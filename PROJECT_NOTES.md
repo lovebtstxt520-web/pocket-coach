@@ -35,4 +35,6 @@ gemini-3.5-flash-lite (25s) -> gemini-3.8-flash (10s) -> claude-haiku-5-5 (last,
 - Plus page (demo only, nothing charged or locked): free vs Plus table, 59 THB/month or 490 THB/year, ROI line from the user's own saved amount, AI use counter (pc_aiuse, 30 free per month shown).
 - "Move to savings" sheet: planned partner bank savings account (referral fee model).
 - Target users: A) Bangkok students and young workers 18-30, B) foreigners living in Thailand.
+- v7: Ask your coach (mode ask) on Insights: user asks about their own money; context = weekText + month totals + wallets + cool-off items + last 25 records.
+- v7.1: sample data (demo: true on every record; load from first screen or Settings, remove in Settings). README.md for judges.
 - Competitors: MeowJot (KBTG, slip reading, 79/149 THB), Money Lover / Spendee / Wallet, Cleo (US AI coach), Buy or Bye / CutCut (cool-off only).
