@@ -18,7 +18,7 @@
 :root[data-theme="olive"]{--bg:#eceee0;--card:#f8f9f1;--ink:#2b3020;--mute:#6f765f;--line:#d9ddc6;--brand:#5b6a36;--brand-ink:#fff;--soft:#dfe4cc;--warn:#a8532e;--warn-soft:#f1dfd3;--gold:#a8862a;--gold-soft:#ece3c3}
 :root[data-theme="rose"]{--bg:#f7e8eb;--card:#fff7f8;--ink:#3b2529;--mute:#8a6d73;--line:#ecd3d8;--brand:#b0496a;--brand-ink:#fff;--soft:#f2d8de;--warn:#b4532a;--warn-soft:#f6e0d2;--gold:#b77b2b;--gold-soft:#f3e4cd}
 *{box-sizing:border-box}
-html,body{margin:0;background:var(--bg);background-image:var(--bgimg,none);background-attachment:fixed;color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI","Noto Sans TC","Noto Sans Thai",sans-serif}
+html,body{overscroll-behavior-y:contain;margin:0;background:var(--bg);background-image:var(--bgimg,none);background-attachment:fixed;color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI","Noto Sans TC","Noto Sans Thai",sans-serif}
 button,input,select,textarea{font:inherit;color:inherit}
 .wrap{max-width:560px;margin:0 auto;padding:16px 16px 110px}
 header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding-top:6px}
@@ -122,6 +122,32 @@ h1{margin:0;font-size:28px;letter-spacing:-.02em}
 .sw button{border:1px solid var(--line);background:var(--bg);border-radius:14px;padding:10px 4px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:6px;font-size:13px;font-weight:600}
 .sw button.on{border:2px solid var(--ink)}
 .sw i{width:30px;height:30px;border-radius:50%;border:1px solid rgba(0,0,0,.12)}
+.wallet .s2{font-size:13px;opacity:.9;margin-top:4px;font-weight:600}
+.goal{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:12px 14px;margin-bottom:12px;cursor:pointer}
+.goal .top{display:flex;justify-content:space-between;gap:10px;font-size:14px}
+.goal .bar{height:8px}.goal .bar i{background:var(--gold)}
+.regret{background:var(--card);border:2px solid var(--brand);border-radius:16px;padding:12px;margin-bottom:12px}
+.regret p{margin:0 0 8px}
+.regret .three{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.regret .three .btn{padding:10px 4px;font-size:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:12px}
+.card h4{margin:0 0 10px;font-size:15px}
+.cbar{display:grid;grid-template-columns:90px 1fr auto;gap:8px;align-items:center;font-size:13px;margin-bottom:7px}
+.cbar .tr{height:10px;border-radius:99px;background:var(--soft);overflow:hidden}
+.cbar .tr i{display:block;height:100%;border-radius:99px}
+.cbar .n{font-variant-numeric:tabular-nums;font-weight:600}
+.split{display:flex;height:12px;border-radius:99px;overflow:hidden;margin:4px 0 8px;background:var(--soft)}
+.legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--mute)}
+.legend b{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:4px}
+.kv{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kv .k{font-size:12px;color:var(--mute)}.kv .v{font-size:18px;font-weight:700;font-variant-numeric:tabular-nums}
+.up{color:var(--warn)}.down{color:var(--brand)}
+.qr{display:flex;flex-direction:column;align-items:center;gap:8px;background:#fff;border-radius:16px;padding:14px;margin:6px 0 10px}
+.qr svg{width:180px;height:180px}
+.qr span{color:#333;font-size:12px;word-break:break-all;text-align:center}
+.ptr{position:fixed;top:0;left:50%;transform:translate(-50%,-60px);z-index:40;background:var(--card);border:1px solid var(--line);border-radius:99px;padding:8px 14px;font-size:13px;color:var(--mute);display:flex;gap:8px;align-items:center;box-shadow:0 4px 16px rgba(0,0,0,.15);transition:transform .15s}
+.ptr i{width:14px;height:14px;border:2px solid var(--soft);border-top-color:var(--brand);border-radius:50%}
+.ptr.go i{animation:r 1s linear infinite}
 .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(20px);background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;opacity:0;transition:.25s;z-index:30;pointer-events:none;font-size:14px;max-width:90vw;text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%)}
 </style>
@@ -135,7 +161,7 @@ h1{margin:0;font-size:28px;letter-spacing:-.02em}
 
   <section class="view on" id="viewSpend">
   <div class="wallet" id="walletCard">
-    <div><div class="k" data-i18n="wallet_left"></div><div class="v" id="vWallet">-</div><div class="s" id="wSub"></div></div>
+    <div><div class="k" data-i18n="wallet_left"></div><div class="v" id="vWallet">-</div><div class="s" id="wSub"></div><div class="s2" id="wOther"></div></div>
     <button id="btnWallet" data-i18n="wallet_set"></button>
   </div>
   <div class="stats">
@@ -158,73 +184,96 @@ h1{margin:0;font-size:28px;letter-spacing:-.02em}
 
   <section class="view" id="viewWant">
   <div class="savedtile"><div class="k" data-i18n="saved_pause"></div><div class="v" id="vSaved">-</div><div class="s" id="savedSub"></div></div>
+  <div id="goalBox"></div>
+  <div id="regretBox"></div>
   <div class="stats">
     <div class="stat"><div class="k" data-i18n="waiting_now"></div><div class="v" id="vWaiting">-</div></div>
     <div class="stat click" id="wageTile"><div class="k" data-i18n="wage_tile"></div><div class="v" id="vWage">-</div></div>
   </div>
-  <p class="muted" data-i18n="want_hint" style="margin:0 4px 10px"></p>
+  <p class="muted" id="wantHint" style="margin:0 4px 10px"></p>
   <div class="acts">
     <label class="btn gold"><span data-i18n="wish_shot"></span><input type="file" accept="image/*" id="fWish"></label>
     <button class="btn sec" id="btnWishManual" data-i18n="wish_manual"></button>
   </div>
   <div id="wishList"></div>
   </section>
+
+  <section class="view" id="viewInsight"><div id="insBody" style="margin-top:16px"></div></section>
 </div>
 
 <nav class="tabs">
   <button class="on" data-tab="Spend"><svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="13" rx="3"/><path d="M16 12.5h2M3 10h18"/></svg><span data-i18n="tab_spend"></span></button>
   <button data-tab="Want"><svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6"/></svg><span data-i18n="tab_want"></span><span class="badge" id="wantBadge" hidden></span></button>
+  <button data-tab="Insight"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span data-i18n="tab_insight"></span></button>
 </nav>
 <div id="sheetWish" class="ov"><div class="sheet" id="wishBody"></div></div>
 <div id="sheetWage" class="ov"><div class="sheet">
   <div class="hd"><h3 data-i18n="wage_title"></h3><button class="btn sec" data-close="sheetWage" data-i18n="cancel"></button></div>
   <p class="muted" data-i18n="wage_hint" style="margin-top:0"></p>
-  <div class="fld"><label data-i18n="wage_label"></label><input id="inWage" type="number" min="0" step="1" inputmode="decimal"></div>
+  <div class="fld"><label data-i18n="wage_label" data-cur></label><input id="inWage" type="number" min="0" step="1" inputmode="decimal"></div>
   <button class="btn full" id="btnWageSave" data-i18n="save"></button>
 </div></div>
 
+<div id="sheetGoal" class="ov"><div class="sheet">
+  <div class="hd"><h3 data-i18n="goal_title"></h3><button class="btn sec" data-close="sheetGoal" data-i18n="cancel"></button></div>
+  <p class="muted" data-i18n="goal_hint" style="margin-top:0"></p>
+  <div class="fld"><label data-i18n="goal_name"></label><input id="inGoalName" maxlength="40"></div>
+  <div class="fld"><label data-i18n="goal_amount" data-cur></label><input id="inGoalAmt" type="number" min="0" step="1" inputmode="decimal"></div>
+  <button class="btn gold full" id="btnGoalSave" data-i18n="save"></button>
+  <button class="btn warn full" id="btnGoalDel" data-i18n="delete"></button>
+</div></div>
 <div id="sheetExp" class="ov"><div class="sheet" id="expBody"></div></div>
 <div id="sheetQuick" class="ov"><div class="sheet" id="quickBody"></div></div>
 <div id="sheetWallet" class="ov"><div class="sheet">
   <div class="hd"><h3 data-i18n="wallet_title"></h3><button class="btn sec" data-close="sheetWallet" data-i18n="cancel"></button></div>
   <p class="muted" data-i18n="wallet_hint" style="margin-top:0"></p>
-  <div class="fld"><label data-i18n="wallet_now"></label><input id="inWallet" type="number" min="0" step="1" inputmode="decimal"></div>
+  <div class="two"><div class="fld"><label data-i18n="wallet_now"></label><input id="inWallet" type="number" min="0" step="1" inputmode="decimal"></div>
+  <div class="fld"><label data-i18n="currency"></label><select id="selWalletCur"></select></div></div>
   <button class="btn full" id="btnWalletSave" data-i18n="save"></button>
   <button class="btn sec full" id="btnWalletAdd" data-i18n="wallet_add"></button>
 </div></div>
 <div id="sheetSet" class="ov"><div class="sheet">
   <div class="hd"><h3 data-i18n="settings"></h3><button class="btn sec" data-close="sheetSet" data-i18n="close"></button></div>
   <div class="fld"><label data-i18n="language"></label><select id="selLang"></select></div>
+  <div class="fld"><label data-i18n="main_cur"></label><select id="selMain"></select></div>
   <p class="lbl" data-i18n="theme"></p><div class="sw" id="themeSw"></div>
-  <div class="fld"><label data-i18n="wage_label"></label><input id="setWage" type="number" min="0" step="1" inputmode="decimal"></div>
+  <div class="fld"><label data-i18n="wage_label" data-cur></label><input id="setWage" type="number" min="0" step="1" inputmode="decimal"></div>
   <label style="display:flex;gap:10px;align-items:center;padding:8px 2px"><input type="checkbox" id="chkSrc" style="width:20px;height:20px;accent-color:var(--brand)"> <span data-i18n="show_src"></span></label>
+  <label style="display:flex;gap:10px;align-items:center;padding:8px 2px"><input type="checkbox" id="chkDemo" style="width:20px;height:20px;accent-color:var(--brand)"> <span data-i18n="demo_mode"></span></label>
+  <p class="lbl" style="margin-top:12px" data-i18n="open_phone"></p>
+  <div class="qr" id="qrBox"></div>
+  <p class="muted" data-i18n="install_hint" style="margin-top:0"></p>
+  <button class="btn sec full" id="btnShare" data-i18n="share_app"></button>
+  <button class="btn sec full" id="btnUpdate" data-i18n="check_update"></button>
   <p class="muted" style="text-align:center;margin:14px 0 0" id="verLbl"></p>
   <button class="btn warn full" id="btnClear" style="margin-top:14px" data-i18n="clear_all"></button>
 </div></div>
 <div id="toast" class="toast"></div>
+<div id="ptr" class="ptr"><i></i><span id="ptrTxt"></span></div>
+<script src="qrcode.js"></script>
 
 <script>
-const VERSION = "2";
+const VERSION = "3";
 // ===== TRANSLATIONS (every language must have exactly the same keys) =====
 const T = {
-en:{app_sub:"Your pocket money coach.",wallet_left:"Cash left in wallet",wallet_set:"Set wallet",wallet_unset:"Tap Set wallet to start",wallet_since:"Since {d} · spent {a}",wallet_title:"Cash in your wallet",wallet_hint:"Count the cash in your wallet now. Pocket subtracts every cash spending after this.",wallet_now:"I have this much cash now (THB)",wallet_add:"Add to wallet (ATM, top up)",wallet_added:"Added {a} to wallet",today_spent:"Spent today",month_spent:"Spent this month",
+en:{app_sub:"Your pocket money coach.",wallet_left:"Cash left in wallet",wallet_set:"Set wallet",wallet_unset:"Tap Set wallet to start",wallet_since:"Since {d} · spent {a}",wallet_title:"Cash in your wallet",wallet_hint:"Count the cash in your wallet now. Pocket subtracts every cash spending after this.",wallet_now:"I have this much cash now",wallet_add:"Add to wallet (ATM, top up)",wallet_added:"Added {a} to wallet",today_spent:"Spent today",month_spent:"Spent this month",
 quick_ph:"e.g. chicken rice 50, taxi 80",quick_title:"Check and save",quick_none:"I could not find any amounts. Try something like \"noodles 60\".",save_all:"Save {n}",scan_receipt:"Scan receipt",from_gallery:"Choose photo",add_manual:"Add by hand",
 empty_exp:"No spending yet",empty_exp_hint:"Type what you spent above, or snap a receipt or a transfer slip.",reading:"Reading...",new_exp:"New spending",edit_exp:"Edit spending",amount:"Amount",merchant:"Where / what",merchant_ph:"e.g. 7-Eleven",category:"Category",method:"Paid with",m_cash:"Cash",m_transfer:"QR / transfer",m_card:"Card",date:"Date",note:"Note",save:"Save",cancel:"Cancel",delete:"Delete",close:"Close",
 confirm_delete:"Delete this item?",retry:"Try again",ai_fail:"The AI is busy right now. Wait a few seconds and tap Try again. You can also fill it in yourself.",ai_items:"What the AI read",ai_check:"Please check the amount before saving.",unreadable:"I could not find a price in this photo. You can type it in.",
 c_food:"Food",c_drink:"Drinks",c_groceries:"Groceries",c_transport:"Transport",c_shopping:"Shopping",c_bills:"Bills",c_health:"Health",c_fun:"Fun",c_other:"Other",
-settings:"Settings",language:"Language",theme:"Theme",th_auto:"Auto",th_light:"Light",th_dark:"Dark",show_src:"Show which AI read each item",clear_all:"Delete all my data",confirm_clear:"Delete all data on this phone?",saved:"Saved",saved_n:"Saved {n} items",today:"Today",yesterday:"Yesterday",manual:"Entered by hand",version:"version {v}",tab_spend:"Spending",tab_want:"Want list",saved_pause:"Saved by pausing",saved_sub:"{n} things you decided to skip",saved_none:"Skip something after the cool-off and it shows up here",waiting_now:"Cooling off",wage_tile:"Your hourly pay",wage_unset:"Tap to set",want_hint:"Want to buy something online? Screenshot it and let it cool off first.",wish_shot:"Add screenshot",wish_manual:"Add by hand",wish_empty:"Nothing on your want list",wish_empty_hint:"Next time you are about to tap Buy, take a screenshot and add it here instead.",new_wish:"Pause before buying",wish_detail:"Want list item",item:"What is it",item_ph:"e.g. wireless earbuds",price:"Price you would pay",store:"Shop or app",wait_for:"Cool off for",d1:"1 day",d2:"2 days",d3:"3 days",start_pause:"Start cool-off",ask_q:"Ask me questions",ask_yourself:"Ask yourself",left_h:"{n} h left",left_m:"{n} min left",ready:"Time is up. Still want it?",still_want:"Still want it",skip_it:"Skip it",skip_now:"I don't need it",bought_on:"Bought · {d}",skipped_on:"Skipped · {d}",sec_ready:"Ready to decide",sec_wait:"Cooling off",sec_done:"Decided",hours_work:"≈ {h} of your work",hrs:"{n} h",mins:"{n} min",wage_title:"Hourly pay",wage_hint:"Prices will also show as hours of your own work. Use what you earn per hour after tax. If you have no job, use your pocket money divided by the hours you study.",wage_label:"I earn this much per hour (THB)",skipped_toast:"Nice choice. {a} stays in your pocket",bought_toast:"Check the details and save it as spending",need_item:"Add a name or price first",busy_wish:"The AI is busy, but you can still start the cool-off.",th_flow:"Flow night",th_cream:"Cream",th_olive:"Olive",th_rose:"Rose",th_purple:"Deep purple",mic_no:"Voice input is not available here. Use the microphone on your keyboard instead."},
-zh:{app_sub:"你的口袋理財教練。",wallet_left:"錢包還剩",wallet_set:"設定錢包",wallet_unset:"按「設定錢包」開始",wallet_since:"{d} 起 · 已花 {a}",wallet_title:"錢包裡的現金",wallet_hint:"數一下你錢包現在有多少現金。之後每一筆現金花費，Pocket 都會自動扣掉。",wallet_now:"我現在有多少現金（泰銖）",wallet_add:"加進錢包（領錢、補錢）",wallet_added:"錢包增加 {a}",today_spent:"今天花了",month_spent:"本月花了",
+settings:"Settings",language:"Language",theme:"Theme",th_auto:"Auto",th_light:"Light",th_dark:"Dark",show_src:"Show which AI read each item",clear_all:"Delete all my data",confirm_clear:"Delete all data on this phone?",saved:"Saved",saved_n:"Saved {n} items",today:"Today",yesterday:"Yesterday",manual:"Entered by hand",version:"version {v}",tab_spend:"Spending",tab_want:"Want list",saved_pause:"Saved by pausing",saved_sub:"{n} things you decided to skip",saved_none:"Skip something after the cool-off and it shows up here",waiting_now:"Cooling off",wage_tile:"Your hourly pay",wage_unset:"Tap to set",want_hint:"Want to buy something online? Screenshot it and let it cool off first.",wish_shot:"Add screenshot",wish_manual:"Add by hand",wish_empty:"Nothing on your want list",wish_empty_hint:"Next time you are about to tap Buy, take a screenshot and add it here instead.",new_wish:"Pause before buying",wish_detail:"Want list item",item:"What is it",item_ph:"e.g. wireless earbuds",price:"Price you would pay",store:"Shop or app",wait_for:"Cool off for",d1:"1 day",d2:"2 days",d3:"3 days",start_pause:"Start cool-off",ask_q:"Ask me questions",ask_yourself:"Ask yourself",left_h:"{n} h left",left_m:"{n} min left",ready:"Time is up. Still want it?",still_want:"Still want it",skip_it:"Skip it",skip_now:"I don't need it",bought_on:"Bought · {d}",skipped_on:"Skipped · {d}",sec_ready:"Ready to decide",sec_wait:"Cooling off",sec_done:"Decided",hours_work:"≈ {h} of your work",hrs:"{n} h",mins:"{n} min",wage_title:"Hourly pay",wage_hint:"Prices will also show as hours of your own work. Use what you earn per hour after tax. If you have no job, use your pocket money divided by the hours you study.",wage_label:"I earn this much per hour",skipped_toast:"Nice choice. {a} stays in your pocket",bought_toast:"Check the details and save it as spending",need_item:"Add a name or price first",busy_wish:"The AI is busy, but you can still start the cool-off.",th_flow:"Flow night",th_cream:"Cream",th_olive:"Olive",th_rose:"Rose",th_purple:"Deep purple",tab_insight:"Insights",currency:"Currency",main_cur:"Main currency (for totals)",wallet_also:"Also: {list}",goal_title:"Savings goal",goal_hint:"Money you keep by skipping things after a cool-off goes toward this goal.",goal_name:"What are you saving for",goal_amount:"Goal amount",goal_set:"Set a savings goal",goal_set_hint:"For example a trip home or a new laptop",goal_prog:"{a} of {b}",goal_pct:"{p}% there",goal_done:"Goal reached",goal_closer:"{a} closer to {g}",regret_q:"{d} ago you bought {x}. Was it worth it?",f_worth:"Worth it",f_okay:"It's okay",f_regret:"Regret it",feel_saved:"Thanks. Your coach will learn from this.",ins_month:"Spent this month",ins_vs:"vs last month, same days",ins_avg:"Daily average",ins_cats:"Where it went",ins_pay:"How you paid",ins_want:"Want list",ins_skipped:"Skipped",ins_bought:"Bought",ins_regret_rate:"Regretted",ins_empty:"Add some spending to see your insights.",coach_title:"Weekly coach",coach_btn:"Get this week's advice",pattern_title:"Your buying pattern",pattern_btn:"Find my pattern",pattern_need:"Rate at least 2 things you bought after a cool-off to unlock this.",updated_on:"Updated {d}",rates_note:"Other currencies are converted at today's rate.",demo_mode:"Demo mode (1 day = 1 minute)",demo_on:"Demo mode: 1 day = 1 minute",open_phone:"Open on your phone",install_hint:"Scan with your phone camera. Then on iPhone tap Share > Add to Home Screen, on Android tap the menu > Install app.",share_app:"Share link",check_update:"Check for updates",pull:"Pull down to update",release:"Release to update",updating:"Updating...",up_to_date:"You have the latest version",new_version:"Updated to the newest version",days:"{n} days",mic_no:"Voice input is not available here. Use the microphone on your keyboard instead."},
+zh:{app_sub:"你的口袋理財教練。",wallet_left:"錢包還剩",wallet_set:"設定錢包",wallet_unset:"按「設定錢包」開始",wallet_since:"{d} 起 · 已花 {a}",wallet_title:"錢包裡的現金",wallet_hint:"數一下你錢包現在有多少現金。之後每一筆現金花費，Pocket 都會自動扣掉。",wallet_now:"我現在有多少現金",wallet_add:"加進錢包（領錢、補錢）",wallet_added:"錢包增加 {a}",today_spent:"今天花了",month_spent:"本月花了",
 quick_ph:"例如：雞飯 50、計程車 80",quick_title:"確認後儲存",quick_none:"找不到金額，試試「麵 60」這樣的寫法。",save_all:"儲存 {n} 筆",scan_receipt:"拍收據",from_gallery:"選照片",add_manual:"手動記一筆",
 empty_exp:"還沒有紀錄",empty_exp_hint:"在上面打字或用語音說你花了什麼，或拍收據、轉帳截圖。",reading:"讀取中...",new_exp:"新增支出",edit_exp:"修改支出",amount:"金額",merchant:"在哪裡／買什麼",merchant_ph:"例如：7-Eleven",category:"類別",method:"付款方式",m_cash:"現金",m_transfer:"掃碼／轉帳",m_card:"刷卡",date:"日期",note:"備註",save:"儲存",cancel:"取消",delete:"刪除",close:"關閉",
 confirm_delete:"要刪除這筆嗎？",retry:"再試一次",ai_fail:"AI 現在比較忙，請稍等幾秒再按一次。你也可以自己填好儲存。",ai_items:"AI 讀到的內容",ai_check:"儲存前請確認金額。",unreadable:"這張照片裡找不到價格，可以自己輸入。",
 c_food:"餐飲",c_drink:"飲料",c_groceries:"日用採買",c_transport:"交通",c_shopping:"購物",c_bills:"帳單",c_health:"醫療保健",c_fun:"娛樂",c_other:"其他",
-settings:"設定",language:"語言",theme:"主題",th_auto:"自動",th_light:"淺色",th_dark:"深色",show_src:"顯示每筆是哪個 AI 讀的",clear_all:"刪除我的所有資料",confirm_clear:"要刪除這支手機上的所有資料嗎？",saved:"已儲存",saved_n:"已儲存 {n} 筆",today:"今天",yesterday:"昨天",manual:"手動輸入",version:"版本 {v}",tab_spend:"記帳",tab_want:"想買清單",saved_pause:"冷靜期省下",saved_sub:"{n} 樣東西決定不買",saved_none:"冷靜期過後選「不買了」，省下的錢會顯示在這裡",waiting_now:"冷靜中",wage_tile:"你的時薪",wage_unset:"點這裡設定",want_hint:"想網購嗎？先截圖放進來冷靜一下。",wish_shot:"加截圖",wish_manual:"手動新增",wish_empty:"想買清單是空的",wish_empty_hint:"下次要按「購買」之前，先截圖放進來。",new_wish:"買之前先停一下",wish_detail:"想買的東西",item:"是什麼東西",item_ph:"例如：無線耳機",price:"實際要付的價格",store:"店家或 app",wait_for:"冷靜多久",d1:"1 天",d2:"2 天",d3:"3 天",start_pause:"開始冷靜期",ask_q:"讓 AI 問我問題",ask_yourself:"問問自己",left_h:"還有 {n} 小時",left_m:"還有 {n} 分鐘",ready:"時間到了，還想買嗎？",still_want:"還是想買",skip_it:"不買了",skip_now:"我不需要了",bought_on:"已購買 · {d}",skipped_on:"沒買 · {d}",sec_ready:"可以決定了",sec_wait:"冷靜中",sec_done:"已決定",hours_work:"約等於你工作 {h}",hrs:"{n} 小時",mins:"{n} 分鐘",wage_title:"時薪",wage_hint:"價格會同時顯示成你要工作幾小時。請填稅後每小時賺多少。沒有工作的話，可以用零用錢除以上課時數。",wage_label:"我每小時賺多少（泰銖）",skipped_toast:"好選擇，{a} 留在你的口袋裡",bought_toast:"確認內容後存成一筆支出",need_item:"請先填名稱或價格",busy_wish:"AI 現在比較忙，但你還是可以開始冷靜期。",th_flow:"Flow 夜色",th_cream:"奶油黃",th_olive:"橄欖綠",th_rose:"玫瑰粉",th_purple:"深紫",mic_no:"這裡不支援語音，可以改用鍵盤上的麥克風。"},
-th:{app_sub:"โค้ชการเงินในกระเป๋าของคุณ",wallet_left:"เงินสดเหลือในกระเป๋า",wallet_set:"ตั้งค่ากระเป๋า",wallet_unset:"แตะตั้งค่ากระเป๋าเพื่อเริ่ม",wallet_since:"ตั้งแต่ {d} · ใช้ไป {a}",wallet_title:"เงินสดในกระเป๋า",wallet_hint:"นับเงินสดในกระเป๋าตอนนี้ Pocket จะหักทุกรายจ่ายเงินสดหลังจากนี้",wallet_now:"ตอนนี้มีเงินสด (บาท)",wallet_add:"เพิ่มเงินเข้ากระเป๋า (กดเงิน เติมเงิน)",wallet_added:"เพิ่ม {a} เข้ากระเป๋า",today_spent:"วันนี้ใช้ไป",month_spent:"เดือนนี้ใช้ไป",
+settings:"設定",language:"語言",theme:"主題",th_auto:"自動",th_light:"淺色",th_dark:"深色",show_src:"顯示每筆是哪個 AI 讀的",clear_all:"刪除我的所有資料",confirm_clear:"要刪除這支手機上的所有資料嗎？",saved:"已儲存",saved_n:"已儲存 {n} 筆",today:"今天",yesterday:"昨天",manual:"手動輸入",version:"版本 {v}",tab_spend:"記帳",tab_want:"想買清單",saved_pause:"冷靜期省下",saved_sub:"{n} 樣東西決定不買",saved_none:"冷靜期過後選「不買了」，省下的錢會顯示在這裡",waiting_now:"冷靜中",wage_tile:"你的時薪",wage_unset:"點這裡設定",want_hint:"想網購嗎？先截圖放進來冷靜一下。",wish_shot:"加截圖",wish_manual:"手動新增",wish_empty:"想買清單是空的",wish_empty_hint:"下次要按「購買」之前，先截圖放進來。",new_wish:"買之前先停一下",wish_detail:"想買的東西",item:"是什麼東西",item_ph:"例如：無線耳機",price:"實際要付的價格",store:"店家或 app",wait_for:"冷靜多久",d1:"1 天",d2:"2 天",d3:"3 天",start_pause:"開始冷靜期",ask_q:"讓 AI 問我問題",ask_yourself:"問問自己",left_h:"還有 {n} 小時",left_m:"還有 {n} 分鐘",ready:"時間到了，還想買嗎？",still_want:"還是想買",skip_it:"不買了",skip_now:"我不需要了",bought_on:"已購買 · {d}",skipped_on:"沒買 · {d}",sec_ready:"可以決定了",sec_wait:"冷靜中",sec_done:"已決定",hours_work:"約等於你工作 {h}",hrs:"{n} 小時",mins:"{n} 分鐘",wage_title:"時薪",wage_hint:"價格會同時顯示成你要工作幾小時。請填稅後每小時賺多少。沒有工作的話，可以用零用錢除以上課時數。",wage_label:"我每小時賺多少",skipped_toast:"好選擇，{a} 留在你的口袋裡",bought_toast:"確認內容後存成一筆支出",need_item:"請先填名稱或價格",busy_wish:"AI 現在比較忙，但你還是可以開始冷靜期。",th_flow:"Flow 夜色",th_cream:"奶油黃",th_olive:"橄欖綠",th_rose:"玫瑰粉",th_purple:"深紫",tab_insight:"分析",currency:"幣別",main_cur:"主要貨幣（用來算總額）",wallet_also:"另外：{list}",goal_title:"存錢目標",goal_hint:"冷靜期後決定不買而省下的錢，會算進這個目標。",goal_name:"想存錢做什麼",goal_amount:"目標金額",goal_set:"設定存錢目標",goal_set_hint:"例如回台灣的機票、新筆電",goal_prog:"{a} / {b}",goal_pct:"已達成 {p}%",goal_done:"目標達成",goal_closer:"離「{g}」又近了 {a}",regret_q:"你在 {d}前買了「{x}」，值得嗎？",f_worth:"值得",f_okay:"還好",f_regret:"後悔",feel_saved:"謝謝，教練會從這裡學習。",ins_month:"本月花了",ins_vs:"和上個月同期比",ins_avg:"每日平均",ins_cats:"錢花去哪裡",ins_pay:"付款方式",ins_want:"想買清單",ins_skipped:"沒買",ins_bought:"買了",ins_regret_rate:"後悔比例",ins_empty:"記幾筆花費後，這裡就會出現分析。",coach_title:"每週教練",coach_btn:"取得本週建議",pattern_title:"你的購物模式",pattern_btn:"找出我的模式",pattern_need:"冷靜期後買的東西，至少評分 2 樣才能使用。",updated_on:"更新於 {d}",rates_note:"其他貨幣用今天的匯率換算。",demo_mode:"示範模式（1 天 = 1 分鐘）",demo_on:"示範模式：1 天 = 1 分鐘",open_phone:"用手機打開",install_hint:"用手機相機掃描。iPhone 按分享 > 加入主畫面；Android 按選單 > 安裝應用程式。",share_app:"分享連結",check_update:"檢查更新",pull:"往下拉更新",release:"放開就更新",updating:"更新中...",up_to_date:"已經是最新版本",new_version:"已更新到最新版本",days:"{n} 天",mic_no:"這裡不支援語音，可以改用鍵盤上的麥克風。"},
+th:{app_sub:"โค้ชการเงินในกระเป๋าของคุณ",wallet_left:"เงินสดเหลือในกระเป๋า",wallet_set:"ตั้งค่ากระเป๋า",wallet_unset:"แตะตั้งค่ากระเป๋าเพื่อเริ่ม",wallet_since:"ตั้งแต่ {d} · ใช้ไป {a}",wallet_title:"เงินสดในกระเป๋า",wallet_hint:"นับเงินสดในกระเป๋าตอนนี้ Pocket จะหักทุกรายจ่ายเงินสดหลังจากนี้",wallet_now:"ตอนนี้มีเงินสด",wallet_add:"เพิ่มเงินเข้ากระเป๋า (กดเงิน เติมเงิน)",wallet_added:"เพิ่ม {a} เข้ากระเป๋า",today_spent:"วันนี้ใช้ไป",month_spent:"เดือนนี้ใช้ไป",
 quick_ph:"เช่น ข้าวมันไก่ 50 แท็กซี่ 80",quick_title:"ตรวจแล้วบันทึก",quick_none:"ไม่พบจำนวนเงิน ลองพิมพ์แบบ \"ก๋วยเตี๋ยว 60\"",save_all:"บันทึก {n} รายการ",scan_receipt:"ถ่ายใบเสร็จ",from_gallery:"เลือกรูป",add_manual:"จดเอง",
 empty_exp:"ยังไม่มีรายการ",empty_exp_hint:"พิมพ์หรือพูดสิ่งที่ใช้จ่ายด้านบน หรือถ่ายใบเสร็จ สลิปโอนเงิน",reading:"กำลังอ่าน...",new_exp:"เพิ่มรายจ่าย",edit_exp:"แก้ไขรายจ่าย",amount:"จำนวนเงิน",merchant:"ที่ไหน / ซื้ออะไร",merchant_ph:"เช่น 7-Eleven",category:"หมวด",method:"จ่ายด้วย",m_cash:"เงินสด",m_transfer:"สแกน / โอน",m_card:"บัตร",date:"วันที่",note:"หมายเหตุ",save:"บันทึก",cancel:"ยกเลิก",delete:"ลบ",close:"ปิด",
 confirm_delete:"ลบรายการนี้หรือไม่",retry:"ลองอีกครั้ง",ai_fail:"ตอนนี้ AI ยุ่งอยู่ รอสักครู่แล้วกดลองอีกครั้ง หรือกรอกเองได้",ai_items:"สิ่งที่ AI อ่านได้",ai_check:"ตรวจสอบจำนวนเงินก่อนบันทึก",unreadable:"ไม่พบราคาในรูปนี้ กรอกเองได้",
 c_food:"อาหาร",c_drink:"เครื่องดื่ม",c_groceries:"ของใช้",c_transport:"เดินทาง",c_shopping:"ช้อปปิ้ง",c_bills:"บิล",c_health:"สุขภาพ",c_fun:"บันเทิง",c_other:"อื่นๆ",
-settings:"การตั้งค่า",language:"ภาษา",theme:"ธีม",th_auto:"อัตโนมัติ",th_light:"สว่าง",th_dark:"มืด",show_src:"แสดงว่า AI ตัวไหนอ่านแต่ละรายการ",clear_all:"ลบข้อมูลทั้งหมดของฉัน",confirm_clear:"ลบข้อมูลทั้งหมดในเครื่องนี้หรือไม่",saved:"บันทึกแล้ว",saved_n:"บันทึก {n} รายการแล้ว",today:"วันนี้",yesterday:"เมื่อวาน",manual:"กรอกเอง",version:"เวอร์ชัน {v}",tab_spend:"รายจ่าย",tab_want:"อยากได้",saved_pause:"ประหยัดได้จากการรอ",saved_sub:"{n} อย่างที่ตัดสินใจไม่ซื้อ",saved_none:"ถ้าเลือกไม่ซื้อหลังรอครบเวลา เงินที่ประหยัดได้จะแสดงที่นี่",waiting_now:"กำลังรอ",wage_tile:"รายได้ต่อชั่วโมง",wage_unset:"แตะเพื่อตั้งค่า",want_hint:"อยากซื้อของออนไลน์ใช่ไหม แคปหน้าจอเก็บไว้ก่อนแล้วรอสักพัก",wish_shot:"เพิ่มภาพหน้าจอ",wish_manual:"เพิ่มเอง",wish_empty:"ยังไม่มีของที่อยากได้",wish_empty_hint:"ครั้งหน้าก่อนกดซื้อ แคปหน้าจอแล้วเพิ่มที่นี่แทน",new_wish:"หยุดคิดก่อนซื้อ",wish_detail:"ของที่อยากได้",item:"ของอะไร",item_ph:"เช่น หูฟังไร้สาย",price:"ราคาที่ต้องจ่าย",store:"ร้านหรือแอป",wait_for:"รอนานแค่ไหน",d1:"1 วัน",d2:"2 วัน",d3:"3 วัน",start_pause:"เริ่มรอ",ask_q:"ให้ AI ถามคำถาม",ask_yourself:"ถามตัวเอง",left_h:"เหลือ {n} ชม.",left_m:"เหลือ {n} นาที",ready:"ครบเวลาแล้ว ยังอยากได้อยู่ไหม",still_want:"ยังอยากได้",skip_it:"ไม่ซื้อแล้ว",skip_now:"ไม่ต้องการแล้ว",bought_on:"ซื้อแล้ว · {d}",skipped_on:"ไม่ซื้อ · {d}",sec_ready:"ตัดสินใจได้แล้ว",sec_wait:"กำลังรอ",sec_done:"ตัดสินใจแล้ว",hours_work:"≈ ทำงาน {h}",hrs:"{n} ชม.",mins:"{n} นาที",wage_title:"รายได้ต่อชั่วโมง",wage_hint:"ราคาจะแสดงเป็นจำนวนชั่วโมงที่คุณต้องทำงานด้วย ใส่รายได้ต่อชั่วโมงหลังหักภาษี ถ้ายังไม่ทำงาน ใช้ค่าขนมหารด้วยชั่วโมงเรียน",wage_label:"ฉันได้ชั่วโมงละ (บาท)",skipped_toast:"เลือกได้ดี {a} ยังอยู่ในกระเป๋า",bought_toast:"ตรวจรายละเอียดแล้วบันทึกเป็นรายจ่าย",need_item:"ใส่ชื่อหรือราคาก่อน",busy_wish:"ตอนนี้ AI ยุ่งอยู่ แต่ยังเริ่มรอได้",th_flow:"Flow ยามค่ำ",th_cream:"ครีม",th_olive:"เขียวมะกอก",th_rose:"ชมพูกุหลาบ",th_purple:"ม่วงเข้ม",mic_no:"ใช้เสียงที่นี่ไม่ได้ ใช้ไมโครโฟนบนคีย์บอร์ดแทน"}
+settings:"การตั้งค่า",language:"ภาษา",theme:"ธีม",th_auto:"อัตโนมัติ",th_light:"สว่าง",th_dark:"มืด",show_src:"แสดงว่า AI ตัวไหนอ่านแต่ละรายการ",clear_all:"ลบข้อมูลทั้งหมดของฉัน",confirm_clear:"ลบข้อมูลทั้งหมดในเครื่องนี้หรือไม่",saved:"บันทึกแล้ว",saved_n:"บันทึก {n} รายการแล้ว",today:"วันนี้",yesterday:"เมื่อวาน",manual:"กรอกเอง",version:"เวอร์ชัน {v}",tab_spend:"รายจ่าย",tab_want:"อยากได้",saved_pause:"ประหยัดได้จากการรอ",saved_sub:"{n} อย่างที่ตัดสินใจไม่ซื้อ",saved_none:"ถ้าเลือกไม่ซื้อหลังรอครบเวลา เงินที่ประหยัดได้จะแสดงที่นี่",waiting_now:"กำลังรอ",wage_tile:"รายได้ต่อชั่วโมง",wage_unset:"แตะเพื่อตั้งค่า",want_hint:"อยากซื้อของออนไลน์ใช่ไหม แคปหน้าจอเก็บไว้ก่อนแล้วรอสักพัก",wish_shot:"เพิ่มภาพหน้าจอ",wish_manual:"เพิ่มเอง",wish_empty:"ยังไม่มีของที่อยากได้",wish_empty_hint:"ครั้งหน้าก่อนกดซื้อ แคปหน้าจอแล้วเพิ่มที่นี่แทน",new_wish:"หยุดคิดก่อนซื้อ",wish_detail:"ของที่อยากได้",item:"ของอะไร",item_ph:"เช่น หูฟังไร้สาย",price:"ราคาที่ต้องจ่าย",store:"ร้านหรือแอป",wait_for:"รอนานแค่ไหน",d1:"1 วัน",d2:"2 วัน",d3:"3 วัน",start_pause:"เริ่มรอ",ask_q:"ให้ AI ถามคำถาม",ask_yourself:"ถามตัวเอง",left_h:"เหลือ {n} ชม.",left_m:"เหลือ {n} นาที",ready:"ครบเวลาแล้ว ยังอยากได้อยู่ไหม",still_want:"ยังอยากได้",skip_it:"ไม่ซื้อแล้ว",skip_now:"ไม่ต้องการแล้ว",bought_on:"ซื้อแล้ว · {d}",skipped_on:"ไม่ซื้อ · {d}",sec_ready:"ตัดสินใจได้แล้ว",sec_wait:"กำลังรอ",sec_done:"ตัดสินใจแล้ว",hours_work:"≈ ทำงาน {h}",hrs:"{n} ชม.",mins:"{n} นาที",wage_title:"รายได้ต่อชั่วโมง",wage_hint:"ราคาจะแสดงเป็นจำนวนชั่วโมงที่คุณต้องทำงานด้วย ใส่รายได้ต่อชั่วโมงหลังหักภาษี ถ้ายังไม่ทำงาน ใช้ค่าขนมหารด้วยชั่วโมงเรียน",wage_label:"ฉันได้ชั่วโมงละ",skipped_toast:"เลือกได้ดี {a} ยังอยู่ในกระเป๋า",bought_toast:"ตรวจรายละเอียดแล้วบันทึกเป็นรายจ่าย",need_item:"ใส่ชื่อหรือราคาก่อน",busy_wish:"ตอนนี้ AI ยุ่งอยู่ แต่ยังเริ่มรอได้",th_flow:"Flow ยามค่ำ",th_cream:"ครีม",th_olive:"เขียวมะกอก",th_rose:"ชมพูกุหลาบ",th_purple:"ม่วงเข้ม",tab_insight:"วิเคราะห์",currency:"สกุลเงิน",main_cur:"สกุลเงินหลัก (ใช้คิดยอดรวม)",wallet_also:"อื่นๆ: {list}",goal_title:"เป้าหมายการออม",goal_hint:"เงินที่ประหยัดได้จากการเลือกไม่ซื้อหลังรอครบเวลา จะนับเข้าเป้าหมายนี้",goal_name:"เก็บเงินเพื่ออะไร",goal_amount:"จำนวนเป้าหมาย",goal_set:"ตั้งเป้าหมายการออม",goal_set_hint:"เช่น ตั๋วกลับบ้าน หรือโน้ตบุ๊กใหม่",goal_prog:"{a} / {b}",goal_pct:"ถึงแล้ว {p}%",goal_done:"ถึงเป้าหมายแล้ว",goal_closer:"ใกล้ {g} อีก {a}",regret_q:"เมื่อ {d}ก่อนคุณซื้อ {x} คุ้มไหม",f_worth:"คุ้ม",f_okay:"เฉยๆ",f_regret:"เสียดาย",feel_saved:"ขอบคุณ โค้ชจะเรียนรู้จากสิ่งนี้",ins_month:"เดือนนี้ใช้ไป",ins_vs:"เทียบเดือนก่อนช่วงเดียวกัน",ins_avg:"เฉลี่ยต่อวัน",ins_cats:"เงินไปไหน",ins_pay:"จ่ายด้วยอะไร",ins_want:"รายการอยากได้",ins_skipped:"ไม่ซื้อ",ins_bought:"ซื้อ",ins_regret_rate:"เสียดาย",ins_empty:"บันทึกรายจ่ายสักหน่อยแล้วจะเห็นการวิเคราะห์",coach_title:"โค้ชประจำสัปดาห์",coach_btn:"ขอคำแนะนำสัปดาห์นี้",pattern_title:"รูปแบบการซื้อของคุณ",pattern_btn:"หารูปแบบของฉัน",pattern_need:"ให้คะแนนของที่ซื้อหลังรอครบเวลาอย่างน้อย 2 อย่างเพื่อใช้ส่วนนี้",updated_on:"อัปเดต {d}",rates_note:"สกุลเงินอื่นคิดตามอัตราแลกเปลี่ยนวันนี้",demo_mode:"โหมดสาธิต (1 วัน = 1 นาที)",demo_on:"โหมดสาธิต: 1 วัน = 1 นาที",open_phone:"เปิดบนมือถือ",install_hint:"สแกนด้วยกล้องมือถือ iPhone กดแชร์ > เพิ่มไปยังหน้าจอโฮม Android กดเมนู > ติดตั้งแอป",share_app:"แชร์ลิงก์",check_update:"ตรวจหาอัปเดต",pull:"ดึงลงเพื่ออัปเดต",release:"ปล่อยเพื่ออัปเดต",updating:"กำลังอัปเดต...",up_to_date:"เป็นเวอร์ชันล่าสุดแล้ว",new_version:"อัปเดตเป็นเวอร์ชันล่าสุดแล้ว",days:"{n} วัน",mic_no:"ใช้เสียงที่นี่ไม่ได้ ใช้ไมโครโฟนบนคีย์บอร์ดแทน"}
 };
 const LANGS = { zh:"繁體中文", en:"English", th:"ไทย" };
 const LOC = { en:"en-US", zh:"zh-TW", th:"th-TH-u-ca-gregory" };
@@ -233,6 +282,10 @@ const CATS = ["food","drink","groceries","transport","shopping","bills","health"
 const METHODS = ["cash","transfer","card"];
 const CAT_COLOR = { food:"#d9822b", drink:"#8a5a44", groceries:"#3f8f5f", transport:"#2f6fb0", shopping:"#b0457a", bills:"#6b5bb8", health:"#c0453b", fun:"#d4a017", other:"#7a837c" };
 const DAY = 86400000;
+const CURS = ["THB", "TWD", "USD", "JPY", "KRW", "CNY", "HKD", "SGD", "MYR", "VND", "EUR", "GBP", "AUD"];
+// rough units per 1 THB, only used until the live rates load
+const FALLBACK_RATES = { THB: 1, TWD: 0.95, USD: 0.03, JPY: 4.5, KRW: 41, CNY: 0.21, HKD: 0.23, SGD: 0.039, MYR: 0.13, VND: 760, EUR: 0.026, GBP: 0.023, AUD: 0.046 };
+const REGRET_AFTER = 7; // days after buying (demo mode: minutes)
 const THEMES = { flow:"linear-gradient(135deg,#2f54ff,#8b3dff)", auto:"linear-gradient(135deg,#fff 50%,#1d231f 50%)", light:"#f4efe4", dark:"#1d231f", cream:"#f8efd9", olive:"#dfe4cc", rose:"#f2d8de", purple:"#241b35" };
 
 // ===== STATE =====
@@ -247,7 +300,17 @@ let exps = lsGet("pc_exp", []);
 let wishes = lsGet("pc_wish", []);
 let wage = lsGet("pc_wage", 0);
 const saveWishes = () => lsSet("pc_wish", wishes);
-let wallet = lsGet("pc_wallet", null); // { base: amount counted, ts: when counted, adds: [{a, ts}] }
+// wallets: one per currency { THB: { base: amount counted, ts: when counted, adds: [{a, ts}] }, TWD: {...} }
+let wallets = lsGet("pc_wallets", null);
+if (!wallets) { const old = lsGet("pc_wallet", null); wallets = old && typeof old.base === "number" ? { THB: old } : {}; }
+const saveWallets = () => lsSet("pc_wallets", wallets);
+let mainCur = lsGet("pc_main", "THB");
+let lastCur = lsGet("pc_lastcur", mainCur);
+let rates = lsGet("pc_rates", null);
+let goal = lsGet("pc_goal", null); // { name, amount, cur }
+let demo = lsGet("pc_demo", false);
+let coach = lsGet("pc_coach", null), pattern = lsGet("pc_pattern", null);
+const dayMs = () => demo ? 60000 : DAY;
 const saveExps = () => lsSet("pc_exp", exps);
 
 function t(k, vars) {
@@ -257,9 +320,11 @@ function t(k, vars) {
 }
 const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c]));
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+const SYM = { THB: "฿", TWD: "NT$", USD: "US$", JPY: "¥", KRW: "₩", CNY: "CN¥", HKD: "HK$", SGD: "S$", MYR: "RM", VND: "₫", EUR: "€", GBP: "£", AUD: "A$" };
 function money(a, cur) {
-  try { return new Intl.NumberFormat(LOC[lang], { style: "currency", currency: cur || "THB", currencyDisplay: "narrowSymbol", maximumFractionDigits: a % 1 ? 2 : 0 }).format(a || 0); }
-  catch (e) { return (cur || "THB") + " " + (a || 0); }
+  cur = cur || "THB"; a = a || 0;
+  const n = new Intl.NumberFormat(LOC[lang], { maximumFractionDigits: a % 1 ? 2 : 0 }).format(Math.abs(a));
+  return (a < 0 ? "-" : "") + (SYM[cur] || cur + " ") + n;
 }
 const startOfDay = ts => { const d = new Date(ts); d.setHours(0, 0, 0, 0); return d.getTime(); };
 const monthStart = () => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).getTime(); };
@@ -277,6 +342,18 @@ const catOptions = sel => CATS.map(c => '<option value="' + c + '"' + (c === sel
 const methodOptions = sel => METHODS.map(m => '<option value="' + m + '"' + (m === sel ? " selected" : "") + ">" + esc(t("m_" + m)) + "</option>").join("");
 const srcLine = by => showSrc ? '<p class="src">' + esc(by ? "AI: " + by : t("manual")) + "</p>" : "";
 const byLine = by => showSrc && by ? '<div class="byline">AI: ' + esc(by) + "</div>" : "";
+const curOptions = sel => CURS.concat(CURS.includes(sel) ? [] : [sel]).map(c => '<option value="' + esc(c) + '"' + (c === sel ? " selected" : "") + ">" + esc(c) + "</option>").join("");
+function conv(a, from, to) {
+  if (from === to) return a;
+  const r = Object.assign({}, FALLBACK_RATES, rates && rates.r);
+  if (!r[from] || !r[to]) return 0;
+  return a / r[from] * r[to];
+}
+const inMain = e => conv(e.amount, e.currency || "THB", mainCur);
+async function loadRates() {
+  if (rates && Date.now() - rates.ts < 6 * 3600000) return;
+  try { const res = await fetch("/api/rates"); const j = await res.json(); if (res.ok && j.rates) { rates = { r: j.rates, ts: Date.now() }; lsSet("pc_rates", rates); renderAll(); } } catch (e) {}
+}
 
 // ===== AI =====
 function processPhoto(file) {
@@ -307,40 +384,45 @@ const b64 = u => u.split(",")[1];
 const errHtml = (err, act) => '<div class="errbox">' + esc(t("ai_fail")) + '<div class="errdetail">' + esc(String(err).slice(0, 240)) + "</div></div>" +
   (act ? '<button class="btn sec full" data-act="' + act + '" style="margin:0 0 10px">' + esc(t("retry")) + "</button>" : "");
 
-// ===== WALLET =====
-function walletLeft() {
-  if (!wallet) return null;
-  const added = (wallet.adds || []).reduce((s, x) => s + x.a, 0);
-  const spent = exps.filter(e => e.method === "cash" && e.currency === "THB" && e.ts >= wallet.ts).reduce((s, e) => s + e.amount, 0);
-  return { left: wallet.base + added - spent, spent };
+// ===== WALLET (one per currency) =====
+function walletLeft(cur) {
+  const w = wallets[cur]; if (!w) return null;
+  const added = (w.adds || []).reduce((s, x) => s + x.a, 0);
+  const spent = exps.filter(e => e.method === "cash" && (e.currency || "THB") === cur && e.ts >= w.ts).reduce((s, e) => s + e.amount, 0);
+  return { left: w.base + added - spent, spent, ts: w.ts };
 }
+const primaryCur = () => wallets[mainCur] ? mainCur : (Object.keys(wallets)[0] || mainCur);
 function renderWallet() {
-  const w = walletLeft();
-  $("vWallet").textContent = w ? money(w.left, "THB") : "-";
-  $("wSub").textContent = w ? t("wallet_since", { d: new Date(wallet.ts).toLocaleDateString(LOC[lang], { month: "short", day: "numeric" }), a: money(w.spent, "THB") }) : t("wallet_unset");
+  const pc = primaryCur(), w = walletLeft(pc);
+  $("vWallet").textContent = w ? money(w.left, pc) : "-";
+  $("wSub").textContent = w ? t("wallet_since", { d: new Date(w.ts).toLocaleDateString(LOC[lang], { month: "short", day: "numeric" }), a: money(w.spent, pc) }) : t("wallet_unset");
+  const others = Object.keys(wallets).filter(c => c !== pc).map(c => money(walletLeft(c).left, c));
+  $("wOther").textContent = others.length ? t("wallet_also", { list: others.join(" · ") }) : "";
   $("walletCard").classList.toggle("low", !!w && w.left < 0);
 }
-$("btnWallet").onclick = () => { const w = walletLeft(); $("inWallet").value = w ? Math.max(0, Math.round(w.left)) : ""; $("sheetWallet").classList.add("open"); setTimeout(() => $("inWallet").focus(), 50); };
+function fillWalletInput() { const w = walletLeft($("selWalletCur").value); $("inWallet").value = w ? Math.max(0, Math.round(w.left)) : ""; }
+$("btnWallet").onclick = () => { $("selWalletCur").innerHTML = curOptions(primaryCur()); fillWalletInput(); $("sheetWallet").classList.add("open"); setTimeout(() => $("inWallet").focus(), 50); };
+$("selWalletCur").onchange = fillWalletInput;
 $("btnWalletSave").onclick = () => {
-  const v = Number($("inWallet").value);
+  const v = Number($("inWallet").value), cur = $("selWalletCur").value;
   if (!(v >= 0) || $("inWallet").value === "") { $("inWallet").focus(); return; }
-  wallet = { base: Math.round(v * 100) / 100, ts: Date.now(), adds: [] }; lsSet("pc_wallet", wallet);
-  $("sheetWallet").classList.remove("open"); renderAll(); toast(t("saved"));
+  if (v === 0 && cur !== mainCur) delete wallets[cur]; else wallets[cur] = { base: Math.round(v * 100) / 100, ts: Date.now(), adds: [] };
+  saveWallets(); $("sheetWallet").classList.remove("open"); renderAll(); toast(t("saved"));
 };
 $("btnWalletAdd").onclick = () => {
-  const v = Number($("inWallet").value);
+  const v = Number($("inWallet").value), cur = $("selWalletCur").value;
   if (!(v > 0)) { $("inWallet").focus(); return; }
-  if (!wallet) wallet = { base: 0, ts: Date.now(), adds: [] };
-  wallet.adds = (wallet.adds || []).concat([{ a: Math.round(v * 100) / 100, ts: Date.now() }]); lsSet("pc_wallet", wallet);
-  $("sheetWallet").classList.remove("open"); renderAll(); toast(t("wallet_added", { a: money(v, "THB") }));
+  if (!wallets[cur]) wallets[cur] = { base: 0, ts: Date.now(), adds: [] };
+  wallets[cur].adds = (wallets[cur].adds || []).concat([{ a: Math.round(v * 100) / 100, ts: Date.now() }]);
+  saveWallets(); $("sheetWallet").classList.remove("open"); renderAll(); toast(t("wallet_added", { a: money(v, cur) }));
 };
 
 // ===== TOTALS AND LIST =====
 function renderStats() {
   const ms = monthStart(), ds = startOfDay(Date.now());
-  const thb = exps.filter(e => e.currency === "THB");
-  $("vToday").textContent = money(thb.filter(e => e.ts >= ds).reduce((s, e) => s + e.amount, 0), "THB");
-  $("vMonth").textContent = money(thb.filter(e => e.ts >= ms).reduce((s, e) => s + e.amount, 0), "THB");
+  const sum = list => (list.some(e => (e.currency || "THB") !== mainCur) ? "≈ " : "") + money(Math.round(list.reduce((s, e) => s + inMain(e), 0)), mainCur);
+  $("vToday").textContent = sum(exps.filter(e => e.ts >= ds));
+  $("vMonth").textContent = sum(exps.filter(e => e.ts >= ms));
 }
 function renderExps() {
   const box = $("expList");
@@ -366,7 +448,7 @@ async function quickParse(text) {
   $("sheetQuick").classList.add("open"); renderQuick();
   const mine = qd;
   try {
-    const r = await callAI({ mode: "quick", text });
+    const r = await callAI({ mode: "quick", text, currency: lastCur });
     if (qd !== mine) return;
     qd.entries = (r.entries || []).map(x => Object.assign({ on: true }, x)); qd.by = r.by || "";
   } catch (e) { if (qd !== mine) return; qd.err = String(e.message || e); }
@@ -381,7 +463,7 @@ function renderQuick() {
   else if (!d.entries.length) h += '<div class="errbox">' + esc(t("quick_none")) + "</div>";
   d.entries.forEach((x, i) => {
     h += '<div class="qe" data-i="' + i + '"><input type="checkbox" data-f="on"' + (x.on ? " checked" : "") + '>' +
-      '<div class="nm"><input data-f="item" value="' + esc(x.item) + '"><div class="meta"><select data-f="category">' + catOptions(x.category) + '</select><select data-f="method">' + methodOptions(x.method) + "</select></div></div>" +
+      '<div class="nm"><input data-f="item" value="' + esc(x.item) + '"><div class="meta"><select data-f="category">' + catOptions(x.category) + '</select><select data-f="method">' + methodOptions(x.method) + '</select><select data-f="currency" style="flex:0 0 74px">' + curOptions(x.currency || lastCur) + "</select></div></div>" +
       '<input class="am" data-f="amount" type="number" min="0" step="0.01" inputmode="decimal" value="' + esc(x.amount) + '"></div>';
   });
   const n = d.entries.filter(x => x.on && Number(x.amount) > 0).length;
@@ -402,7 +484,8 @@ $("quickBody").addEventListener("click", e => {
   if (b.dataset.act === "retry") { quickParse(qd.text); return; }
   if (b.dataset.act === "saveall") {
     const now = Date.now();
-    const add = qd.entries.filter(x => x.on && Number(x.amount) > 0).map((x, i) => ({ id: uid(), ts: now + i, amount: Math.round(Number(x.amount) * 100) / 100, currency: "THB", merchant: String(x.item || "").trim(), category: CATS.includes(x.category) ? x.category : "other", method: METHODS.includes(x.method) ? x.method : "cash", note: "", items: [], thumb: "", by: qd.by }));
+    const add = qd.entries.filter(x => x.on && Number(x.amount) > 0).map((x, i) => ({ id: uid(), ts: now + i, amount: Math.round(Number(x.amount) * 100) / 100, currency: x.currency || lastCur, merchant: String(x.item || "").trim(), category: CATS.includes(x.category) ? x.category : "other", method: METHODS.includes(x.method) ? x.method : "cash", note: "", items: [], thumb: "", by: qd.by }));
+    if (add.length) { lastCur = add[add.length - 1].currency; lsSet("pc_lastcur", lastCur); }
     exps = exps.concat(add); saveExps(); $("quickIn").value = ""; closeQuick(); renderAll(); toast(t("saved_n", { n: add.length }));
   }
 });
@@ -430,7 +513,7 @@ function openExp(opts) {
   if (opts.editId) {
     const e = exps.find(x => x.id === opts.editId); if (!e) return;
     ed = { editId: e.id, amount: e.amount, currency: e.currency, merchant: e.merchant, category: e.category, method: e.method || "cash", ts: e.ts, note: e.note || "", thumb: e.thumb || "", full: "", items: e.items || [], aiNote: "", err: "", by: e.by || "", wishId: e.wishId || "", step: "form" };
-  } else ed = Object.assign({ amount: "", currency: "THB", merchant: "", category: "food", method: "cash", ts: Date.now(), note: "", thumb: "", full: "", items: [], aiNote: "", err: "", by: "", step: "form" }, opts.prefill || {});
+  } else ed = Object.assign({ amount: "", currency: lastCur, merchant: "", category: "food", method: "cash", ts: Date.now(), note: "", thumb: "", full: "", items: [], aiNote: "", err: "", by: "", step: "form" }, opts.prefill || {});
   $("sheetExp").classList.add("open"); renderExp();
 }
 function closeExp() { $("sheetExp").classList.remove("open"); ed = null; }
@@ -461,8 +544,11 @@ function renderExp() {
   if (d.err) h += errHtml(d.err, d.full ? "rescan" : "");
   if (d.scanned) h += '<div class="ai"><b>' + esc(t("ai_items")) + "</b>" + (d.items.length ? "<ul>" + d.items.map(x => "<li>" + esc(x.name) + (x.price ? " · " + esc(money(x.price, d.currency)) : "") + "</li>").join("") + "</ul>" : "") + '<div style="margin-top:6px">' + esc(d.aiNote || t("ai_check")) + "</div>" + byLine(d.by) + "</div>";
   else if (d.editId && showSrc) h += '<p class="src" style="margin:0 0 10px">' + esc(d.by ? "AI: " + d.by : t("manual")) + "</p>";
-  h += '<div class="two"><div class="fld"><label>' + esc(t("amount")) + " (" + esc(d.currency) + ')</label><input id="eAmt" type="number" min="0" step="0.01" inputmode="decimal" value="' + esc(d.amount) + '"></div>' +
-    '<div class="fld"><label>' + esc(t("category")) + '</label><select id="eCat">' + catOptions(d.category) + "</select></div></div>" +
+  const hrs = hoursText(Number(d.amount), d.currency);
+  h += '<div class="two"><div class="fld"><label>' + esc(t("amount")) + '</label><input id="eAmt" type="number" min="0" step="0.01" inputmode="decimal" value="' + esc(d.amount) + '"></div>' +
+    '<div class="fld"><label>' + esc(t("currency")) + '</label><select id="eCur">' + curOptions(d.currency) + "</select></div></div>" +
+    '<p class="hrsbig" id="eHrs">' + esc(hrs) + "</p>" +
+    '<div class="fld"><label>' + esc(t("category")) + '</label><select id="eCat">' + catOptions(d.category) + "</select></div>" +
     '<div class="fld"><label>' + esc(t("merchant")) + '</label><input id="eMer" maxlength="60" placeholder="' + esc(t("merchant_ph")) + '" value="' + esc(d.merchant) + '"></div>' +
     '<p class="lbl">' + esc(t("method")) + '</p><div class="seg" style="margin-bottom:10px">' + METHODS.map(m => '<button data-m="' + m + '" class="' + (d.method === m ? "on" : "") + '">' + esc(t("m_" + m)) + "</button>").join("") + "</div>" +
     '<div class="two"><div class="fld"><label>' + esc(t("date")) + '</label><input id="eDate" type="date" value="' + esc(toDateInput(d.ts)) + '"></div>' +
@@ -472,9 +558,11 @@ function renderExp() {
 }
 $("expBody").addEventListener("input", e => {
   if (!ed) return; const id = e.target.id, v = e.target.value;
-  if (id === "eAmt") ed.amount = v; if (id === "eCat") ed.category = v; if (id === "eMer") ed.merchant = v;
+  if (id === "eAmt" || id === "eCur") { if (id === "eAmt") ed.amount = v; else ed.currency = v; const h = $("eHrs"); if (h) h.textContent = hoursText(Number(ed.amount), ed.currency); }
+  if (id === "eCat") ed.category = v; if (id === "eMer") ed.merchant = v;
   if (id === "eDate") ed.ts = fromDateInput(v, ed.ts); if (id === "eNote") ed.note = v;
 });
+$("expBody").addEventListener("change", e => { if (e.target.tagName === "SELECT") e.target.dispatchEvent(new Event("input", { bubbles: true })); });
 $("expBody").addEventListener("click", e => {
   if (!ed) return;
   const mb = e.target.closest("[data-m]"); if (mb) { ed.method = mb.dataset.m; renderExp(); return; }
@@ -491,6 +579,7 @@ function saveExp() {
   const rec = { id: ed.editId || uid(), ts: ed.ts, amount: amt, currency: ed.currency || "THB", merchant: String(ed.merchant || "").trim(), category: CATS.includes(ed.category) ? ed.category : "other", method: METHODS.includes(ed.method) ? ed.method : "cash", note: String(ed.note || "").trim(), items: ed.items || [], thumb: ed.thumb || "", by: ed.by || "", wishId: ed.wishId || "" };
   if (ed.editId) exps = exps.map(x => x.id === ed.editId ? rec : x); else exps.push(rec);
   if (!saveExps()) { rec.thumb = ""; saveExps(); }
+  lastCur = rec.currency; lsSet("pc_lastcur", lastCur);
   closeExp(); renderAll(); toast(t("saved"));
 }
 function onFile(input, fn) { input.addEventListener("change", e => { const f = e.target.files && e.target.files[0]; e.target.value = ""; if (f) fn(f); }); }
@@ -498,9 +587,10 @@ onFile($("fCam"), expFromPhoto); onFile($("fGal"), expFromPhoto);
 $("btnManual").onclick = () => openExp();
 
 // ===== HOURS OF WORK =====
-function hoursText(price) {
+function hoursText(price, cur) {
   if (!(wage > 0) || !(price > 0)) return "";
-  const h = price / wage;
+  const h = conv(price, cur || mainCur, mainCur) / wage;
+  if (!isFinite(h) || h <= 0) return "";
   const v = h < 1 ? t("mins", { n: Math.max(1, Math.round(h * 60)) }) : t("hrs", { n: h < 10 ? Math.round(h * 10) / 10 : Math.round(h) });
   return t("hours_work", { h: v });
 }
@@ -522,20 +612,22 @@ function wishCard(w) {
   if (ready) status = '<p class="s go">' + esc(t("ready")) + "</p>";
   else if (done) status = '<p class="s">' + esc(t(w.status === "bought" ? "bought_on" : "skipped_on", { d: shortDate(w.decidedTs) })) + "</p>";
   else status = '<p class="s">' + esc(leftText(w)) + '</p><div class="bar"><i style="width:' + Math.min(100, Math.round((Date.now() - w.ts) / (w.until - w.ts) * 100)) + '%"></i></div>';
-  const hrs = hoursText(w.price);
+  const hrs = hoursText(w.price, w.currency);
   return '<div class="wcard' + (ready ? " ready" : "") + (done ? " done" : "") + '" data-wid="' + esc(w.id) + '">' +
     (w.thumb ? '<img class="wthumb" alt="" src="' + esc(w.thumb) + '">' : '<div class="wthumb">' + esc((w.item || "?").slice(0, 1)) + "</div>") +
     '<div class="main"><p class="t">' + esc(w.item || t("c_" + w.category)) + '</p><p class="p">' + esc(money(w.price, w.currency)) + (hrs ? ' <span class="hrs">' + esc(hrs) + "</span>" : "") + "</p>" + status + "</div></div>";
 }
 function renderWant() {
-  const skipped = wishes.filter(w => w.status === "skipped" && w.currency === "THB");
-  $("vSaved").textContent = money(skipped.reduce((s, w) => s + w.price, 0), "THB");
+  const skipped = wishes.filter(w => w.status === "skipped");
+  $("vSaved").textContent = money(Math.round(savedTotal(mainCur)), mainCur);
+  renderGoal(); renderRegret();
   $("savedSub").textContent = skipped.length ? t("saved_sub", { n: skipped.length }) : t("saved_none");
   const waiting = wishes.filter(w => w.status === "wait");
   $("vWaiting").textContent = String(waiting.length);
   $("vWage").textContent = wage > 0 ? money(wage, "THB") : t("wage_unset");
-  const ready = waiting.filter(isReady);
-  $("wantBadge").hidden = !ready.length; $("wantBadge").textContent = ready.length;
+  const ready = waiting.filter(isReady), due = regretDue().length;
+  $("wantBadge").hidden = !(ready.length + due); $("wantBadge").textContent = ready.length + due;
+  $("wantHint").textContent = demo ? t("demo_on") : t("want_hint");
   if (!wishes.length) { $("wishList").innerHTML = '<div class="empty"><b>' + esc(t("wish_empty")) + "</b>" + esc(t("wish_empty_hint")) + "</div>"; return; }
   const sec = (k, list) => list.length ? '<p class="day">' + esc(t(k)) + "</p>" + list.map(wishCard).join("") : "";
   $("wishList").innerHTML = sec("sec_ready", ready.sort((a, b) => a.until - b.until)) +
@@ -548,7 +640,7 @@ let wd = null;
 function openWish(opts) {
   opts = opts || {};
   if (opts.id) { const w = wishes.find(x => x.id === opts.id); if (!w) return; wd = { view: w.id }; }
-  else wd = { item: "", price: "", currency: "THB", store: "", category: "shopping", questions: [], tip: "", thumb: "", full: "", days: 1, step: "form", err: "", by: "" };
+  else wd = { item: "", price: "", currency: mainCur, store: "", category: "shopping", questions: [], tip: "", thumb: "", full: "", days: 1, step: "form", err: "", by: "" };
   $("sheetWish").classList.add("open"); renderWish();
 }
 function closeWish() { $("sheetWish").classList.remove("open"); wd = null; }
@@ -581,7 +673,7 @@ function renderWish() {
   const d = wd; if (!d) return;
   if (d.view) {
     const w = wishes.find(x => x.id === d.view); if (!w) { closeWish(); return; }
-    const ready = isReady(w), hrs = hoursText(w.price);
+    const ready = isReady(w), hrs = hoursText(w.price, w.currency);
     let h = '<div class="hd"><h3>' + esc(t("wish_detail")) + '</h3><button class="btn sec" data-act="close">' + esc(t("close")) + "</button></div>" +
       (w.thumb ? '<img class="prev" alt="" src="' + esc(w.thumb) + '">' : "") +
       '<h3 style="margin:0 0 2px">' + esc(w.item || t("c_" + w.category)) + "</h3>" +
@@ -599,7 +691,7 @@ function renderWish() {
   if (d.step === "loading") { $("wishBody").innerHTML = h + '<div class="spin"><i></i>' + esc(t("reading")) + "</div>"; return; }
   if (d.err) h += '<div class="errbox">' + esc(t("busy_wish")) + '<div class="errdetail">' + esc(d.err.slice(0, 240)) + "</div></div>";
   h += qBox(d.questions, d.tip, d.by);
-  const hrs = hoursText(Number(d.price));
+  const hrs = hoursText(Number(d.price), d.currency);
   h += '<div class="fld"><label>' + esc(t("item")) + '</label><input id="wItem" maxlength="80" placeholder="' + esc(t("item_ph")) + '" value="' + esc(d.item) + '"></div>' +
     '<div class="two"><div class="fld"><label>' + esc(t("price")) + " (" + esc(d.currency) + ')</label><input id="wPrice" type="number" min="0" step="0.01" inputmode="decimal" value="' + esc(d.price) + '"></div>' +
     '<div class="fld"><label>' + esc(t("store")) + '</label><input id="wStore" maxlength="40" value="' + esc(d.store) + '"></div></div>' +
@@ -613,7 +705,7 @@ function renderWish() {
 $("wishBody").addEventListener("input", e => {
   if (!wd || wd.view) return; const id = e.target.id, v = e.target.value;
   if (id === "wItem") wd.item = v; if (id === "wStore") wd.store = v;
-  if (id === "wPrice") { wd.price = v; const el = $("wHrs"); if (el) el.textContent = hoursText(Number(v)); }
+  if (id === "wPrice") { wd.price = v; const el = $("wHrs"); if (el) el.textContent = hoursText(Number(v), wd.currency); }
 });
 $("wishBody").addEventListener("click", e => {
   if (!wd) return;
@@ -626,12 +718,12 @@ $("wishBody").addEventListener("click", e => {
     const price = Math.round(Number(wd.price) * 100) / 100;
     if (!wd.item.trim() && !(price > 0)) { toast(t("need_item")); return; }
     const now = Date.now();
-    wishes.push({ id: uid(), ts: now, until: now + wd.days * DAY, item: wd.item.trim(), price: price > 0 ? price : 0, currency: wd.currency || "THB", store: wd.store.trim(), category: wd.category, questions: wd.questions, tip: wd.tip, thumb: wd.thumb, status: "wait", decidedTs: 0, by: wd.by });
+    wishes.push({ id: uid(), ts: now, until: now + wd.days * dayMs(), item: wd.item.trim(), price: price > 0 ? price : 0, currency: wd.currency || "THB", store: wd.store.trim(), category: wd.category, questions: wd.questions, tip: wd.tip, thumb: wd.thumb, status: "wait", decidedTs: 0, by: wd.by });
     if (!saveWishes()) { wishes[wishes.length - 1].thumb = ""; saveWishes(); }
     closeWish(); renderAll(); toast(t("saved")); return;
   }
   const w = wishes.find(x => x.id === wd.view); if (!w) return;
-  if (a === "skip") { w.status = "skipped"; w.decidedTs = Date.now(); saveWishes(); closeWish(); renderAll(); toast(t("skipped_toast", { a: money(w.price, w.currency) })); }
+  if (a === "skip") { w.status = "skipped"; w.decidedTs = Date.now(); saveWishes(); closeWish(); renderAll(); toast(t("skipped_toast", { a: money(w.price, w.currency) }) + (goal ? " · " + t("goal_closer", { a: money(w.price, w.currency), g: goal.name }) : "")); }
   if (a === "buy") {
     w.status = "bought"; w.decidedTs = Date.now(); saveWishes(); closeWish(); renderAll(); showTab("Spend");
     openExp({ prefill: { amount: w.price || "", currency: w.currency, merchant: w.item, category: w.category, method: "transfer", wishId: w.id, thumb: w.thumb } });
@@ -641,6 +733,137 @@ $("wishBody").addEventListener("click", e => {
 });
 onFile($("fWish"), wishFromPhoto);
 $("btnWishManual").onclick = () => openWish();
+
+// ===== SAVINGS GOAL =====
+const savedTotal = cur => wishes.filter(w => w.status === "skipped").reduce((s, w) => s + conv(w.price, w.currency || "THB", cur), 0);
+function renderGoal() {
+  if (!goal) { $("goalBox").innerHTML = '<div class="goal" data-goal><div class="top"><b>' + esc(t("goal_set")) + '</b><span class="muted">+</span></div><div class="muted">' + esc(t("goal_set_hint")) + "</div></div>"; return; }
+  const have = savedTotal(goal.cur), pct = goal.amount > 0 ? Math.min(100, Math.round(have / goal.amount * 100)) : 0;
+  $("goalBox").innerHTML = '<div class="goal" data-goal><div class="top"><b>' + esc(goal.name) + '</b><span>' + esc(pct >= 100 ? t("goal_done") : t("goal_pct", { p: pct })) + '</span></div><div class="bar"><i style="width:' + pct + '%"></i></div><div class="muted" style="margin-top:4px">' + esc(t("goal_prog", { a: money(Math.round(have), goal.cur), b: money(goal.amount, goal.cur) })) + "</div></div>";
+}
+$("goalBox").addEventListener("click", () => { $("inGoalName").value = goal ? goal.name : ""; $("inGoalAmt").value = goal ? goal.amount : ""; $("btnGoalDel").hidden = !goal; $("sheetGoal").classList.add("open"); });
+$("btnGoalSave").onclick = () => {
+  const name = $("inGoalName").value.trim(), amt = Number($("inGoalAmt").value);
+  if (!name) { $("inGoalName").focus(); return; } if (!(amt > 0)) { $("inGoalAmt").focus(); return; }
+  goal = { name, amount: Math.round(amt), cur: mainCur }; lsSet("pc_goal", goal); $("sheetGoal").classList.remove("open"); renderAll(); toast(t("saved"));
+};
+$("btnGoalDel").onclick = () => { if (!confirm(t("confirm_delete"))) return; goal = null; lsSet("pc_goal", null); $("sheetGoal").classList.remove("open"); renderAll(); };
+
+// ===== REGRET CHECK (a week after buying something from the want list) =====
+const regretDue = () => wishes.filter(w => w.status === "bought" && !w.feel && Date.now() >= w.decidedTs + REGRET_AFTER * dayMs()).sort((a, b) => a.decidedTs - b.decidedTs);
+function renderRegret() {
+  const w = regretDue()[0];
+  if (!w) { $("regretBox").innerHTML = ""; return; }
+  const n = Math.max(1, Math.round((Date.now() - w.decidedTs) / dayMs()));
+  $("regretBox").innerHTML = '<div class="regret" data-rid="' + esc(w.id) + '"><p><b>' + esc(t("regret_q", { d: t("days", { n }), x: w.item || money(w.price, w.currency) })) + '</b></p><div class="three">' +
+    ["worth", "okay", "regret"].map(f => '<button class="btn ' + (f === "regret" ? "warn" : "sec") + '" data-feel="' + f + '">' + esc(t("f_" + f)) + "</button>").join("") + "</div></div>";
+}
+$("regretBox").addEventListener("click", e => {
+  const b = e.target.closest("[data-feel]"); if (!b) return;
+  const w = wishes.find(x => x.id === b.closest("[data-rid]").dataset.rid); if (!w) return;
+  w.feel = b.dataset.feel; w.feelTs = Date.now(); saveWishes(); pattern = null; lsSet("pc_pattern", null); renderAll(); toast(t("feel_saved"));
+});
+
+// ===== INSIGHTS AND COACH =====
+let coachBusy = "", coachErr = {};
+function periodSum(from, to) { return exps.filter(e => e.ts >= from && e.ts < to).reduce((s, e) => s + inMain(e), 0); }
+function renderInsights() {
+  const box = $("insBody"); if (!box) return;
+  const now = Date.now(), ms = monthStart(), d0 = new Date(ms);
+  const prevStart = new Date(d0.getFullYear(), d0.getMonth() - 1, 1).getTime();
+  const month = exps.filter(e => e.ts >= ms), total = periodSum(ms, now + 1), prev = periodSum(prevStart, Math.min(ms, prevStart + (now - ms)));
+  const days = new Date().getDate();
+  let h = "";
+  if (!exps.length) h += '<div class="empty"><b>' + esc(t("ins_empty")) + "</b></div>";
+  else {
+    const ch = prev > 0 ? Math.round((total - prev) / prev * 100) : null;
+    h += '<div class="card"><div class="kv"><div><div class="k">' + esc(t("ins_month")) + '</div><div class="v">' + esc(money(Math.round(total), mainCur)) + "</div>" +
+      (ch != null ? '<div class="k ' + (ch > 0 ? "up" : "down") + '">' + (ch > 0 ? "+" : "") + ch + "% " + esc(t("ins_vs")) + "</div>" : "") + "</div>" +
+      '<div><div class="k">' + esc(t("ins_avg")) + '</div><div class="v">' + esc(money(Math.round(total / days), mainCur)) + "</div></div></div></div>";
+    const byCat = {}; month.forEach(e => { byCat[e.category] = (byCat[e.category] || 0) + inMain(e); });
+    const cats = Object.keys(byCat).sort((a, b) => byCat[b] - byCat[a]), max = byCat[cats[0]] || 1;
+    if (cats.length) h += '<div class="card"><h4>' + esc(t("ins_cats")) + "</h4>" + cats.map(c => '<div class="cbar"><span>' + esc(t("c_" + c)) + '</span><span class="tr"><i style="width:' + Math.max(3, Math.round(byCat[c] / max * 100)) + "%;background:" + CAT_COLOR[c] + '"></i></span><span class="n">' + esc(money(Math.round(byCat[c]), mainCur)) + "</span></div>").join("") + "</div>";
+    const byM = {}; month.forEach(e => { byM[e.method] = (byM[e.method] || 0) + inMain(e); });
+    const MC = { cash: "#3f8f5f", transfer: "#2f6fb0", card: "#8a4fb0" };
+    if (total > 0) h += '<div class="card"><h4>' + esc(t("ins_pay")) + '</h4><div class="split">' + METHODS.filter(m => byM[m]).map(m => '<i style="width:' + (byM[m] / total * 100) + "%;background:" + MC[m] + '"></i>').join("") + '</div><div class="legend">' + METHODS.filter(m => byM[m]).map(m => "<span><b style=\"background:" + MC[m] + "\"></b>" + esc(t("m_" + m)) + " " + Math.round(byM[m] / total * 100) + "%</span>").join("") + "</div></div>";
+  }
+  const sk = wishes.filter(w => w.status === "skipped"), bo = wishes.filter(w => w.status === "bought"), rated = bo.filter(w => w.feel);
+  if (wishes.length) h += '<div class="card"><h4>' + esc(t("ins_want")) + '</h4><div class="kv"><div><div class="k">' + esc(t("ins_skipped")) + '</div><div class="v">' + sk.length + " · " + esc(money(Math.round(savedTotal(mainCur)), mainCur)) + '</div></div><div><div class="k">' + esc(t("ins_bought")) + '</div><div class="v">' + bo.length + "</div></div>" +
+    (rated.length ? '<div><div class="k">' + esc(t("ins_regret_rate")) + '</div><div class="v">' + Math.round(rated.filter(w => w.feel === "regret").length / rated.length * 100) + "%</div></div>" : "") + "</div></div>";
+  h += coachCard("weekly", "coach_title", "coach_btn", coach, exps.length > 0, "");
+  h += coachCard("regret", "pattern_title", "pattern_btn", pattern, rated.length >= 2, t("pattern_need"));
+  if (exps.some(e => (e.currency || "THB") !== mainCur) || wishes.some(w => (w.currency || "THB") !== mainCur)) h += '<p class="muted" style="text-align:center">' + esc(t("rates_note")) + "</p>";
+  box.innerHTML = h;
+}
+function coachCard(mode, title, btn, data, ok, need) {
+  let h = '<div class="card"><h4>' + esc(t(title)) + "</h4>";
+  if (data) h += '<div class="ai" style="margin-bottom:8px"><b>' + esc(data.headline) + '</b><ul>' + (data.tips || []).map(x => "<li>" + esc(x) + "</li>").join("") + "</ul>" + byLine(data.by) + '<div class="muted" style="margin-top:6px;font-size:11px">' + esc(t("updated_on", { d: new Date(data.ts).toLocaleString(LOC[lang], { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) })) + "</div></div>";
+  if (coachBusy === mode) h += '<div class="spin"><i></i>' + esc(t("reading")) + "</div>";
+  else if (coachErr[mode]) h += errHtml(coachErr[mode], "");
+  if (!ok && need) h += '<p class="muted" style="margin:0">' + esc(need) + "</p>";
+  else if (ok && coachBusy !== mode) h += '<button class="btn sec full" data-coach="' + mode + '">' + esc(t(data ? "retry" : btn)) + "</button>";
+  return h + "</div>";
+}
+function weekText() {
+  const now = Date.now(), wk = 7 * DAY;
+  const cats = (from, to) => { const o = {}; exps.filter(e => e.ts >= from && e.ts < to).forEach(e => { o[e.category] = (o[e.category] || 0) + inMain(e); }); return o; };
+  const a = cats(now - wk, now + 1), b = cats(now - 2 * wk, now - wk);
+  const lines = ["Currency: " + mainCur, "Last 7 days total: " + Math.round(periodSum(now - wk, now + 1)) + " (previous 7 days: " + Math.round(periodSum(now - 2 * wk, now - wk)) + ")"];
+  Object.keys(Object.assign({}, a, b)).forEach(c => lines.push("- " + c + ": " + Math.round(a[c] || 0) + " (previous: " + Math.round(b[c] || 0) + ")"));
+  const cash = exps.filter(e => e.ts >= now - wk && e.method === "cash").reduce((s, e) => s + inMain(e), 0);
+  lines.push("Paid in cash last 7 days: " + Math.round(cash));
+  const pc = primaryCur(), wl = walletLeft(pc); if (wl) lines.push("Cash left in wallet: " + Math.round(wl.left) + " " + pc);
+  const sk = wishes.filter(w => w.status === "skipped" && w.decidedTs >= now - wk);
+  lines.push("Things skipped after a cool-off this week: " + sk.length + " worth " + Math.round(sk.reduce((s, w) => s + conv(w.price, w.currency, mainCur), 0)));
+  lines.push("Items waiting in cool-off: " + wishes.filter(w => w.status === "wait").length);
+  if (goal) lines.push("Savings goal: " + goal.name + ", " + Math.round(savedTotal(goal.cur)) + " of " + goal.amount + " " + goal.cur);
+  if (wage > 0) lines.push("Hourly pay: " + wage + " " + mainCur);
+  return lines.join("\n");
+}
+function regretText() {
+  return wishes.filter(w => w.status === "bought" && w.feel).map(w => "- " + (w.item || "item") + ", " + w.category + ", " + Math.round(conv(w.price, w.currency, mainCur)) + " " + mainCur + ", felt a week later: " + (w.feel === "worth" ? "worth it" : w.feel)).join("\n") +
+    "\nSkipped after cool-off: " + wishes.filter(w => w.status === "skipped").map(w => (w.item || "item") + " (" + w.category + ")").join(", ");
+}
+$("insBody").addEventListener("click", async e => {
+  const b = e.target.closest("[data-coach]"); if (!b || coachBusy) return;
+  const mode = b.dataset.coach; coachBusy = mode; coachErr[mode] = ""; renderInsights();
+  try {
+    const r = await callAI({ mode, text: mode === "weekly" ? weekText() : regretText() });
+    const out = { headline: r.headline, tips: r.tips || [], by: r.by || "", ts: Date.now() };
+    if (mode === "weekly") { coach = out; lsSet("pc_coach", coach); } else { pattern = out; lsSet("pc_pattern", pattern); }
+  } catch (err) { coachErr[mode] = String(err.message || err); }
+  coachBusy = ""; renderInsights();
+});
+
+// ===== OPEN ON PHONE (QR), SHARE, UPDATES =====
+const appUrl = () => location.origin + "/";
+function renderQR() {
+  const box = $("qrBox");
+  if (typeof qrcode !== "function" || !/^https?:/.test(location.protocol)) { box.hidden = true; return; }
+  try { const q = qrcode(0, "M"); q.addData(appUrl()); q.make(); box.innerHTML = q.createSvgTag({ cellSize: 4, margin: 2, scalable: true }) + "<span>" + esc(appUrl()) + "</span>"; box.hidden = false; } catch (e) { box.hidden = true; }
+}
+$("btnShare").onclick = async () => {
+  try { if (navigator.share) { await navigator.share({ title: "Pocket Coach", url: appUrl() }); return; } } catch (e) { return; }
+  try { await navigator.clipboard.writeText(appUrl()); toast(appUrl()); } catch (e) { toast(appUrl()); }
+};
+async function doUpdate() {
+  $("ptr").classList.add("go"); $("ptr").style.transform = "translate(-50%,12px)"; $("ptrTxt").textContent = t("updating");
+  try { const reg = navigator.serviceWorker && await navigator.serviceWorker.getRegistration(); if (reg) await reg.update(); } catch (e) {}
+  try { sessionStorage.setItem("pc_justupdated", "1"); } catch (e) {}
+  setTimeout(() => location.reload(), 400);
+}
+$("btnUpdate").onclick = doUpdate;
+// pull down from the top of the page to update (works inside the installed app too)
+let ptrStart = null, ptrDist = 0;
+document.addEventListener("touchstart", e => { ptrStart = window.scrollY <= 0 && !document.querySelector(".ov.open") ? e.touches[0].clientY : null; ptrDist = 0; }, { passive: true });
+document.addEventListener("touchmove", e => {
+  if (ptrStart == null) return;
+  ptrDist = e.touches[0].clientY - ptrStart;
+  if (ptrDist <= 0) { $("ptr").style.transform = ""; return; }
+  $("ptr").style.transform = "translate(-50%," + (Math.min(ptrDist / 2, 70) - 60) + "px)";
+  $("ptrTxt").textContent = t(ptrDist > 120 ? "release" : "pull");
+}, { passive: true });
+document.addEventListener("touchend", () => { if (ptrStart == null) return; ptrStart = null; if (ptrDist > 120) doUpdate(); else $("ptr").style.transform = ""; });
 
 // ===== TABS =====
 function showTab(name) {
@@ -658,8 +881,11 @@ document.querySelectorAll("[data-close]").forEach(b => b.addEventListener("click
 document.querySelectorAll(".ov").forEach(o => o.addEventListener("click", e => { if (e.target === o) { o.classList.remove("open"); if (o.id === "sheetExp") ed = null; if (o.id === "sheetQuick") qd = null; if (o.id === "sheetWish") wd = null; } }));
 $("selLang").onchange = e => { lang = e.target.value; lsSet("pc_lang", lang); applyLang(); };
 $("themeSw").addEventListener("click", e => { const b = e.target.closest("[data-th]"); if (!b) return; theme = b.dataset.th; lsSet("pc_theme", theme); applyTheme(); });
+$("selMain").onchange = e => { mainCur = e.target.value; lsSet("pc_main", mainCur); applyLang(); };
+$("chkDemo").onchange = e => { demo = e.target.checked; lsSet("pc_demo", demo); renderAll(); };
+$("btnSettings").addEventListener("click", renderQR);
 $("chkSrc").onchange = e => { showSrc = e.target.checked; lsSet("pc_showsrc", showSrc); renderAll(); };
-$("btnClear").onclick = () => { if (!confirm(t("confirm_clear"))) return; exps = []; wallet = null; wishes = []; saveExps(); saveWishes(); lsSet("pc_wallet", null); $("sheetSet").classList.remove("open"); renderAll(); };
+$("btnClear").onclick = () => { if (!confirm(t("confirm_clear"))) return; exps = []; wallets = {}; wishes = []; goal = null; coach = null; pattern = null; saveExps(); saveWishes(); saveWallets(); ["pc_wallet", "pc_goal", "pc_coach", "pc_pattern"].forEach(k => lsSet(k, null)); $("sheetSet").classList.remove("open"); renderAll(); };
 function applyTheme() {
   if (theme === "auto") document.documentElement.removeAttribute("data-theme"); else document.documentElement.setAttribute("data-theme", theme);
   $("themeSw").innerHTML = Object.keys(THEMES).map(k => '<button data-th="' + k + '" class="' + (k === theme ? "on" : "") + '"><i style="background:' + THEMES[k] + '"></i>' + esc(t("th_" + k)) + "</button>").join("");
@@ -667,7 +893,9 @@ function applyTheme() {
 }
 function applyLang() {
   document.documentElement.lang = lang === "zh" ? "zh-Hant" : lang;
-  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n); });
+  document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.dataset.i18n) + (el.hasAttribute("data-cur") ? " (" + mainCur + ")" : ""); });
+  $("selMain").innerHTML = curOptions(mainCur);
+  $("chkDemo").checked = demo;
   $("quickIn").placeholder = t("quick_ph");
   $("selLang").innerHTML = Object.keys(LANGS).map(k => '<option value="' + k + '"' + (k === lang ? " selected" : "") + ">" + LANGS[k] + "</option>").join("");
   $("verLbl").textContent = t("version", { v: VERSION });
@@ -676,11 +904,17 @@ function applyLang() {
   $("setWage").value = wage || "";
   if (ed) renderExp(); if (qd) renderQuick(); if (wd) renderWish();
 }
-function renderAll() { renderWallet(); renderStats(); renderExps(); renderWant(); }
+function renderAll() { renderWallet(); renderStats(); renderExps(); renderWant(); renderInsights(); }
 
 // ===== START =====
 applyLang();
-showTab(lsGet("pc_tab", "Spend") === "Want" ? "Want" : "Spend");
+showTab(["Spend", "Want", "Insight"].includes(lsGet("pc_tab", "Spend")) ? lsGet("pc_tab", "Spend") : "Spend");
+loadRates();
+try { if (sessionStorage.getItem("pc_justupdated")) { sessionStorage.removeItem("pc_justupdated"); toast(t("new_version") + " · " + t("version", { v: VERSION })); } } catch (e) {}
+if ("serviceWorker" in navigator && navigator.serviceWorker.controller) {
+  let reloaded = false;
+  navigator.serviceWorker.addEventListener("controllerchange", () => { if (reloaded) return; reloaded = true; try { sessionStorage.setItem("pc_justupdated", "1"); } catch (e) {} location.reload(); });
+}
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
 </script>
 </body>

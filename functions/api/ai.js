@@ -5,7 +5,7 @@
 // Request: { mode, lang: "en"|"zh"|"th", image?: base64 jpeg (no data: prefix), text?: string }
 // modes and replies (every reply also has `by` = model that answered):
 //   receipt -> { readable, amount, currency, merchant, category, method, items:[{name,price}], note }
-//   quick   -> { entries:[{ item, amount, category, method }] }            (text note, may be voice-typed)
+//   quick   -> { entries:[{ item, amount, category, method, currency }] }  (optional currency = default)            (text note, may be voice-typed)
 //   wish    -> { item, price, currency, store, category, questions[3], tip }
 //   weekly  -> { headline, tips[] }                                        (text summary)
 //   regret  -> { headline, tips[] }                                        (text summary of past purchases)
@@ -27,7 +27,7 @@ const SYSTEM = {
   ].join(' '),
   quick: [
     'You turn a short note of spending into separate entries. The note may be typed or voice-transcribed, in Thai, English or Chinese, and may contain several items, for example "chicken rice 50, taxi 80, thai tea 25" or "ข้าวมันไก่ 50 แท็กซี่ 80".',
-    'Answer ONLY with a JSON object: { "entries": [ { "item": short name, "amount": number, "category": one of ' + CATS.join(', ') + ', "method": one of cash, transfer, card (default cash; use transfer if the note says scan, QR, PromptPay or transfer; card if it says card) } ] }.',
+    'Answer ONLY with a JSON object: { "entries": [ { "item": short name, "amount": number, "category": one of ' + CATS.join(', ') + ', "method": one of cash, transfer, card (default cash; use transfer if the note says scan, QR, PromptPay or transfer; card if it says card), "currency": 3-letter code (use the default currency given below unless the note says another one, e.g. NT$ or 台幣 = TWD, 円 or yen = JPY, US$ = USD) } ] }.',
     'Skip anything without an amount. Do not invent amounts. Keep the order of the note.'
   ].join(' '),
   wish: [
@@ -59,6 +59,8 @@ export async function onRequestPost({ request, env }) {
   const parts = [];
   if (body.image) parts.push({ inline_data: { mime_type: 'image/jpeg', data: String(body.image) } });
   if (body.text) parts.push({ text: String(body.text).slice(0, 4000) });
+  const defCur = cur(body.currency);
+  if (mode === 'quick') parts.push({ text: 'Default currency: ' + defCur });
   if (!parts.length) return reply(400, { error: 'Nothing to read.' });
   parts.push({ text: 'IMPORTANT: write every sentence, question, tip and item name in ' + LANG[lang] + ', even if the input is in another language. Keep shop and brand names as printed.' });
 
@@ -141,7 +143,7 @@ function clean(mode, o) {
     items: (Array.isArray(o.items) ? o.items : []).slice(0, 6).map((x) => ({ name: str(x && x.name, 60), price: num(x && x.price) })).filter((x) => x.name)
   };
   if (mode === 'quick') return {
-    entries: (Array.isArray(o.entries) ? o.entries : []).slice(0, 20).map((x) => ({ item: str(x && x.item, 60), amount: num(x && x.amount), category: cat(x && x.category), method: meth(x && x.method) })).filter((x) => x.amount > 0)
+    entries: (Array.isArray(o.entries) ? o.entries : []).slice(0, 20).map((x) => ({ item: str(x && x.item, 60), amount: num(x && x.amount), category: cat(x && x.category), method: meth(x && x.method), currency: cur(x && x.currency) })).filter((x) => x.amount > 0)
   };
   if (mode === 'wish') return {
     item: str(o.item, 80), price: num(o.price), currency: cur(o.currency), store: str(o.store, 40), category: cat(o.category),
