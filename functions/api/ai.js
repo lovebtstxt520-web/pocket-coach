@@ -9,6 +9,7 @@
 //   wish    -> { item, price, currency, store, category, questions[3], tip }
 //   weekly  -> { headline, tips[] }                                        (text summary)
 //   translate -> { items:[{ id, text }] }                                   (text = JSON list of {id, text})
+//   ask     -> { answer, tips[] }                                           (text = data summary + question)
 //   regret  -> { headline, tips[] }                                        (text summary of past purchases)
 // Error: HTTP 502 { error: "model: reason | model: reason" }
 
@@ -45,6 +46,12 @@ const SYSTEM = {
   regret: [
     'You are a friendly money coach. You get a list of things the user bought after a cool-off period, each with its category, price and how they felt a week later (worth it, okay, regret).',
     'Answer ONLY with a JSON object: { "headline": one short sentence describing their pattern (which kinds of purchases they tend to regret or not), "tips": 2 short, kind, concrete suggestions }. Base it ONLY on the data. If there is too little data, say so kindly.'
+  ].join(' '),
+  ask: [
+    'You are Pocket Coach, a warm, practical money coach inside a spending app used in Thailand. The user asks you a question about their own money.',
+    'You get a summary of their real data (wallet cash, spending, savings goal, want list) and then their question.',
+    'Answer ONLY with a JSON object: { "answer": 2 to 4 short sentences that answer the question directly using their real numbers, "tips": up to 3 short, concrete next steps }.',
+    'Use only the numbers given; if something is unknown, say what they could record to find out. Be kind, never shame. Do not give investment, legal or tax advice; for those, suggest a professional.'
   ].join(' '),
   translate: [
     'You translate short names of spending records (things people bought or where they spent money) for a money tracking app.',
@@ -153,6 +160,7 @@ function clean(mode, o) {
   if (mode === 'quick') return {
     entries: (Array.isArray(o.entries) ? o.entries : []).slice(0, 20).map((x) => ({ item: str(x && x.item, 60), amount: num(x && x.amount), category: cat(x && x.category), method: meth(x && x.method), currency: cur(x && x.currency) })).filter((x) => x.amount > 0)
   };
+  if (mode === 'ask') return { answer: str(o.answer, 900), tips: list(o.tips, 3, 220) };
   if (mode === 'translate') return {
     items: (Array.isArray(o.items) ? o.items : []).slice(0, 100).map((x) => ({ id: str(x && x.id, 40), text: str(x && x.text, 80) })).filter((x) => x.id && x.text)
   };
