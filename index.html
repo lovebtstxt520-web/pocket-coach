@@ -269,7 +269,7 @@ h1{margin:0;font-size:28px;letter-spacing:-.02em}
 <script src="qrcode.js"></script>
 
 <script>
-const VERSION = "5.1";
+const VERSION = "5.2";
 // ===== TRANSLATIONS (every language must have exactly the same keys) =====
 const T = {
 en:{app_sub:"Your pocket money coach.",wallet_left:"Cash left in wallet",wallet_set:"Set wallet",wallet_unset:"Tap Set wallet to start",wallet_since:"Since {d} · spent {a}",wallet_title:"Cash in your wallet",wallet_hint:"Count the cash in your wallet now. Pocket subtracts every cash spending after this.",wallet_now:"I have this much cash now",wallet_add:"Add to wallet (ATM, top up)",wallet_added:"Added {a} to wallet",today_spent:"Spent today",month_spent:"Spent this month",
@@ -751,7 +751,7 @@ $("wishBody").addEventListener("click", e => {
     closeWish(); renderAll(); toast(t("saved")); return;
   }
   const w = wishes.find(x => x.id === wd.view); if (!w) return;
-  if (a === "skip") { w.status = "skipped"; w.decidedTs = w.u = Date.now(); saveWishes(); closeWish(); renderAll(); toast(t("skipped_toast", { a: money(w.price, w.currency) }) + (goal ? " · " + t("goal_closer", { a: money(w.price, w.currency), g: goal.name }) : "")); }
+  if (a === "skip") { w.status = "skipped"; w.decidedTs = w.u = Date.now(); saveWishes(); closeWish(); renderAll(); toast(t("skipped_toast", { a: money(w.price, w.currency) }) + (goal ? " · " + t("goal_closer", { a: money(w.price, w.currency), g: nameOf(goal, "name") }) : "")); }
   if (a === "buy") {
     w.status = "bought"; w.decidedTs = w.u = Date.now(); saveWishes(); closeWish(); renderAll(); showTab("Spend");
     openExp({ prefill: { amount: w.price || "", currency: w.currency, merchant: w.item, category: w.category, method: "transfer", wishId: w.id, thumb: w.thumb } });
@@ -767,13 +767,13 @@ const savedTotal = cur => wishes.filter(w => w.status === "skipped").reduce((s, 
 function renderGoal() {
   if (!goal) { $("goalBox").innerHTML = '<div class="goal" data-goal><div class="top"><b>' + esc(t("goal_set")) + '</b><span class="muted">+</span></div><div class="muted">' + esc(t("goal_set_hint")) + "</div></div>"; return; }
   const have = savedTotal(goal.cur), pct = goal.amount > 0 ? Math.min(100, Math.round(have / goal.amount * 100)) : 0;
-  $("goalBox").innerHTML = '<div class="goal" data-goal><div class="top"><b>' + esc(goal.name) + '</b><span>' + esc(pct >= 100 ? t("goal_done") : t("goal_pct", { p: pct })) + '</span></div><div class="bar"><i style="width:' + pct + '%"></i></div><div class="muted" style="margin-top:4px">' + esc(t("goal_prog", { a: money(Math.round(have), goal.cur), b: money(goal.amount, goal.cur) })) + "</div></div>";
+  $("goalBox").innerHTML = '<div class="goal" data-goal><div class="top"><b>' + esc(nameOf(goal, "name")) + '</b><span>' + esc(pct >= 100 ? t("goal_done") : t("goal_pct", { p: pct })) + '</span></div><div class="bar"><i style="width:' + pct + '%"></i></div><div class="muted" style="margin-top:4px">' + esc(t("goal_prog", { a: money(Math.round(have), goal.cur), b: money(goal.amount, goal.cur) })) + "</div></div>";
 }
 $("goalBox").addEventListener("click", () => { $("inGoalName").value = goal ? goal.name : ""; $("inGoalAmt").value = goal ? goal.amount : ""; $("btnGoalDel").hidden = !goal; $("sheetGoal").classList.add("open"); });
 $("btnGoalSave").onclick = () => {
   const name = $("inGoalName").value.trim(), amt = Number($("inGoalAmt").value);
   if (!name) { $("inGoalName").focus(); return; } if (!(amt > 0)) { $("inGoalAmt").focus(); return; }
-  goal = { name, amount: Math.round(amt), cur: mainCur }; lsSet("pc_goal", goal); $("sheetGoal").classList.remove("open"); renderAll(); toast(t("saved"));
+  goal = { name, amount: Math.round(amt), cur: mainCur, lang: goal && goal.name === name ? goal.lang : lang, tr: goal && goal.name === name ? goal.tr : undefined }; lsSet("pc_goal", goal); $("sheetGoal").classList.remove("open"); renderAll(); toast(t("saved"));
 };
 $("btnGoalDel").onclick = () => { if (!confirm(t("confirm_delete"))) return; goal = null; lsSet("pc_goal", null); $("sheetGoal").classList.remove("open"); renderAll(); };
 
@@ -907,6 +907,7 @@ async function translateNames() {
   const need = [];
   exps.forEach(e => { if (e.merchant && e.lang !== lang && !(e.tr && e.tr.src === e.merchant && e.tr[lang])) need.push({ rec: e, field: "merchant", text: e.merchant }); });
   wishes.forEach(w => { if (w.item && w.lang !== lang && !(w.tr && w.tr.src === w.item && w.tr[lang])) need.push({ rec: w, field: "item", text: w.item }); });
+  if (goal && goal.name && goal.lang !== lang && !(goal.tr && goal.tr.src === goal.name && goal.tr[lang])) need.push({ rec: goal, field: "name", text: goal.name, goal: true });
   if (!need.length) return;
   trBusy = true;
   const want = lang;
@@ -917,12 +918,13 @@ async function translateNames() {
       if (lang !== want) break;
       (r.items || []).forEach(it => {
         const x = batch[Number(it.id)]; if (!x) return;
-        const list = x.field === "merchant" ? exps : wishes, rec = list.find(y => y.id === x.rec.id) || x.rec;
+        const rec = x.goal ? goal : ((x.field === "merchant" ? exps : wishes).find(y => y.id === x.rec.id) || x.rec);
+        if (!rec) return;
         const src = rec[x.field]; if (src !== x.text) return;
         if (!rec.tr || rec.tr.src !== src) rec.tr = { src };
         rec.tr[want] = it.text;
       });
-      rawSet("pc_exp", exps); rawSet("pc_wish", wishes);
+      rawSet("pc_exp", exps); rawSet("pc_wish", wishes); if (goal) rawSet("pc_goal", goal);
       renderAll(); if (wd) renderWish();
     }
   } catch (e) { setTimeout(translateNames, 15000); }
@@ -1162,7 +1164,7 @@ async function shareCard() {
   g.font = font(800, 190); const big = g.createLinearGradient(90, 0, 900, 0); big.addColorStop(0, "#8fa0ff"); big.addColorStop(1, "#c79bff"); g.fillStyle = big; g.fillText(money(total, mainCur), 90, 560);
   g.fillStyle = "#eef0ff"; g.font = font(600, 54); let y = wrap(t("card_saved"), 90, 660, 900, 70);
   g.fillStyle = "#9ba2cc"; g.font = font(500, 44); y = wrap(t("card_skipped", { n }), 90, y + 20, 900, 60);
-  if (goal) { const pct = Math.min(100, Math.round(savedTotal(goal.cur) / goal.amount * 100)); y = wrap(t("card_goal", { g: goal.name, p: pct }), 90, y + 10, 900, 60);
+  if (goal) { const pct = Math.min(100, Math.round(savedTotal(goal.cur) / goal.amount * 100)); y = wrap(t("card_goal", { g: nameOf(goal, "name"), p: pct }), 90, y + 10, 900, 60);
     g.fillStyle = "#283058"; g.fillRect(90, y, 900, 22); g.fillStyle = "#c79bff"; g.fillRect(90, y, 900 * pct / 100, 22); }
   g.fillStyle = "#eef0ff"; g.font = font(700, 60); g.fillText(t("card_cta"), 90, H - 190);
   g.fillStyle = "#9ba2cc"; g.font = font(500, 36); g.fillText(location.host || "pocket coach", 90, H - 120);
