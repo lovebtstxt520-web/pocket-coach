@@ -21,7 +21,7 @@ gemini-3.5-flash-lite (25s) -> gemini-3.8-flash (10s) -> claude-haiku-5-5 (last,
 
 ## Layers
 1. Done (v1): quick text/voice entry, receipt and slip scan with payment method, wallet balance, day list, edit/delete, 3 languages, theme.
-2. Want list, cool-off, saved total, hours of work.
+2. Done (v2): want list, cool-off, saved total, hours of work, tabs, 8 themes (default Flow night).
 3. Regret check, savings goal, insights, weekly coach.
 4. Login + sync, friend challenge, share card.
 5. QR, brake guide, polish, demo, deck.
