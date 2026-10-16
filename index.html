@@ -8,6 +8,10 @@
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
+<script>
+/* Apply the saved theme before the first paint, so the page never flashes the old colours */
+(function(){try{var t=JSON.parse(localStorage.getItem("pc_theme")||'"flow"');if(t&&t!=="auto")document.documentElement.setAttribute("data-theme",t);}catch(e){document.documentElement.setAttribute("data-theme","flow");}})();
+</script>
 <style>
 :root{--bg:#f4efe4;--card:#fffdf8;--ink:#1f2a24;--mute:#6b736c;--line:#e4ddcd;--brand:#1f6f54;--brand-ink:#fff;--soft:#e3efe8;--warn:#b4532a;--warn-soft:#f8e6dc;--gold:#c58a1a;--gold-soft:#f7ecd2}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#141815;--card:#1d231f;--ink:#e9ece7;--mute:#9aa39c;--line:#2e3631;--brand:#4fb58b;--brand-ink:#0f1612;--soft:#20352b;--warn:#f08b62;--warn-soft:#3a2219;--gold:#e5b34f;--gold-soft:#3a2f17}}
@@ -352,7 +356,7 @@ h1{margin:0;font-size:28px;letter-spacing:-.02em}
 <script src="qrcode.js"></script>
 
 <script>
-const VERSION = "8.4";
+const VERSION = "8.5";
 // ===== TRANSLATIONS (every language must have exactly the same keys) =====
 const T = {
 en:{app_sub:"Your pocket money coach.",wallet_left:"Cash left in wallet",wallet_set:"Set wallet",wallet_unset:"Tap Set wallet to start",wallet_since:"Since {d} · spent {a}",wallet_title:"Cash in your wallet",wallet_hint:"Pocket takes every cash expense off automatically. Use Add or Take out when you get cash from an ATM or give some away, or set the exact amount you have now.",wallet_now:"I have this much cash now",wallet_add:"Add to wallet (ATM, top up)",wallet_added:"Added {a} to wallet",today_spent:"Spent today",month_spent:"Spent this month",
